@@ -4,7 +4,7 @@
 #include <system_error>
 #include <vector>
 
-namespace SolvLib {
+namespace James::Atoms {
 
 // Holds information about an individual atom
 // Assuming that the data is 3-D
@@ -86,4 +86,4 @@ public:
   // Get the number of atoms
   int n_atoms() { return atoms.size(); }
 };
-} // namespace SolvLib
+} // namespace James::Atoms
