@@ -85,9 +85,33 @@ public:
     return ids;
   }
 
+  // Find all the indices (not IDs actually) in atoms with the desired molecule
+  // ID
+  std::vector<size_t> find_atoms_in_molecule(int target_mol_id) const {
+    std::vector<size_t> indices{};
+    auto it = atoms.begin();
+
+    while (it != atoms.end()) {
+      it = std::find_if(it, atoms.end(), [target_mol_id](const Atom &atom) {
+        if (atom.mol_id.has_value()) {
+          return atom.mol_id == target_mol_id;
+        } else {
+          return false;
+        }
+      });
+
+      if (it != atoms.end()) {
+        indices.push_back(std::distance(atoms.begin(), it));
+        ++it; // Move iterator to the next element
+      }
+    }
+
+    return indices;
+  }
+
   // Distance (with or without periodic boundary conditions) between two Atom
   // objects in the System
-  double distance(size_t index1, size_t index2) {
+  double distance(size_t index1, size_t index2) const {
     double r = 0.0;
     const size_t ndim = 3; // Number of dimensions (3)
     // For three dimensions
