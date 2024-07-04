@@ -11,7 +11,7 @@ inc = include_directories('james/include')
 james_dep = declare_dependency(include_directories : inc, dependencies: graphlib_dep)
 
 tests = [
-  ['Test_Dummy', 'test/test_dummy.cpp'],
+  ['Test_System', 'test/test_system.cpp'],
 ]
 
 test_inc = []

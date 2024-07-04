@@ -1,5 +1,7 @@
 #pragma once
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <optional>
 #include <system_error>
 #include <vector>
@@ -81,6 +83,23 @@ public:
                    [](Atom const &a) -> double { return a.id; });
 
     return ids;
+  }
+
+  // Distance (with or without periodic boundary conditions) between two Atom
+  // objects in the System
+  double distance(size_t index1, size_t index2) {
+    double r = 0.0;
+    const size_t ndim = 3; // Number of dimensions (3)
+    // For three dimensions
+    for (size_t i = 0; i < ndim; i++) {
+      auto dr = atoms[index1].position[i] - atoms[index2].position[i];
+      if (box.has_value()) {
+        dr = dr - round(dr / box.value()[i]) * box.value()[i];
+      }
+      r += dr * dr; // Update the distance
+    }
+
+    return sqrt(r);
   }
 
   // Get the number of atoms
