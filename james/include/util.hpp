@@ -40,4 +40,65 @@ inline std::vector<double> relative_distance(
 
   return rel_distances;
 }
+
+// Function to calculate the angle ABC (in radians) given the coordinates for
+// points A, B and C.
+inline double
+angleABC(const std::vector<double> &A, const std::vector<double> &B,
+         const std::vector<double> &C,
+         const std::optional<std::vector<double>> &box = std::nullopt) {
+  // Ensure the input vectors have exactly the same number of elements
+  if (A.size() != B.size() || B.size() != C.size()) {
+    throw std::invalid_argument(
+        "All points must have exactly the same number of dimensions.");
+  }
+
+  // Vector AB
+  auto ab_vector = relative_distance(A, B, box);
+
+  // Vector CB
+  auto cb_vector = relative_distance(C, B, box);
+
+  // Dot product of AB and CB
+  double dot_product = 0.0;
+  // Magnitudes of AB and CB
+  double ab_norm = 0.0;
+  double cb_norm = 0.0;
+  for (size_t i = 0; i < ab_vector.size(); i++) {
+    dot_product += ab_vector[i] * cb_vector[i];
+    ab_norm += ab_vector[i] * ab_vector[i];
+    cb_norm += cb_vector[i] * cb_vector[i];
+  }
+  ab_norm = std::sqrt(ab_norm);
+  cb_norm = std::sqrt(cb_norm);
+
+  // Check for zero magnitude to avoid division by zero
+  if (ab_norm == 0.0 || cb_norm == 0.0) {
+    throw std::runtime_error("One of the vectors has zero length.");
+  }
+
+  // Cosine of the angle
+  double cos_theta = dot_product / (ab_norm * cb_norm);
+
+  // To avoid any numerical errors leading to values slightly outside [-1, 1]
+  if (cos_theta < -1.0)
+    cos_theta = -1.0;
+  if (cos_theta > 1.0)
+    cos_theta = 1.0;
+
+  // Angle in radians
+  return std::acos(cos_theta);
+}
+
+// Function to calculate the angle ABC (in degrees) given the coordinates for
+// points A, B and C.
+inline double
+angleABCdeg(const std::vector<double> &A, const std::vector<double> &B,
+            const std::vector<double> &C,
+            const std::optional<std::vector<double>> &box = std::nullopt) {
+  // Convert to degrees
+  double angleDegrees = angleABC(A, B, C, box) * (180.0 / M_PI);
+  return angleDegrees;
+}
+
 } // namespace James::Misc
