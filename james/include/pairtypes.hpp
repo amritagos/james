@@ -32,25 +32,29 @@ struct MyHash {
   std::size_t operator()(const Pair &s) const noexcept {
     std::size_t h1 = std::hash<int>{}(s.typeA);
     std::size_t h2 = std::hash<int>{}(s.typeB);
-    return h1 ^ (h2 << 1);
-  }
-
-  // Create an unordered_map with the Pair as the key and the cutoff as the
-  // value
-  std::unordered_map<Pair, double, MyHash>
-  create_pairtype_cutoffs(std::vector<Pair> &pairs,
-                          std::vector<double> &cutoffs) {
-    auto cutoff_map = std::unordered_map<Pair, double, MyHash>{};
-
-    if (pairs.size() != cutoffs.size()) {
-      std::runtime_error("Inconsistent Pair and cutoff values\n");
+    if (s.typeA > s.typeB) {
+      return h1 ^ h2;
+    } else {
+      return h2 ^ h1;
     }
-
-    for (size_t i = 0; i < pairs.size(); i++) {
-      cutoff_map[pairs[i]] = cutoffs[i];
-    }
-
-    return cutoff_map;
   }
 };
+
+// Create an unordered_map with the Pair as the key and the cutoff as the
+// value
+inline std::unordered_map<Pair, double, MyHash>
+create_pairtype_cutoffs(std::vector<Pair> &pairs,
+                        std::vector<double> &cutoffs) {
+  auto cutoff_map = std::unordered_map<Pair, double, MyHash>{};
+
+  if (pairs.size() != cutoffs.size()) {
+    std::runtime_error("Inconsistent Pair and cutoff values\n");
+  }
+
+  for (size_t i = 0; i < pairs.size(); i++) {
+    cutoff_map[pairs[i]] = cutoffs[i];
+  }
+
+  return cutoff_map;
+}
 } // namespace James::Bond
