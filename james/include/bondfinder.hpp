@@ -28,7 +28,7 @@ void add_hbonds(Graph::NetworkBase<WeightType> &network,
                 const std::vector<int> &donor_atom_types,
                 const std::vector<int> &acceptor_atom_types,
                 const std::vector<int> &h_atom_types,
-                double cutoff_distance = 3.5, double max_angle_deg = 30,
+                double cutoff_distance = 3.2, double max_angle_deg = 30,
                 bool ignore_hydrogens = true) {
   // Lambda for checking if a particular atom type (target) is one of allowed
   // atom types
@@ -71,6 +71,11 @@ void add_hbonds(Graph::NetworkBase<WeightType> &network,
               double hda_angle =
                   Misc::angleABCdeg(h_atom.position, donor.position,
                                     acceptor.position, system.box);
+
+              // Somehow we need to restrict the angle to less than 90
+              if (hda_angle > 90) {
+                hda_angle = 180 - hda_angle;
+              }
               if (hda_angle > max_angle_deg) {
                 continue;
               }
