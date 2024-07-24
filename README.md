@@ -1,6 +1,6 @@
 # James
 
-<img src="resources/hbond_fig.png" width="300" />
+<img src="https://github.com/amritagos/james/blob/main/resources/hbond_fig.png?raw=true" width="300" />
 
 A small C++ library to create Network objects (with hydrogen bonds, distance-based cutoffs), and System (similar to the ASE Atoms) objects. Image rendered using [`solvis`](https://github.com/amritagos/solvis).
 
