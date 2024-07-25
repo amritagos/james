@@ -12,6 +12,9 @@ james_dep = declare_dependency(include_directories : inc, dependencies: graphlib
 
 tests = [
   ['Test_System', 'test/test_system.cpp'],
+  ['Test_Hbond', 'test/test_hbond.cpp'],
+  ['Test_Pairtypes', 'test/test_pairtypes.cpp'],
+  ['Test_Distance_Bonds', 'test/test_dist_bonds.cpp'],
 ]
 
 test_inc = []
