@@ -56,4 +56,55 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
 
   // The system should have 22 atoms
   REQUIRE(system.n_atoms() == 22);
+
+  // The undirected network
+  auto network = Graph::UndirectedNetwork<double>(system.n_atoms());
+
+  // Create the bonds from the Fe center to the water molecules (to the O atoms)
+  auto pair_feo = James::Bond::Pair(fe_type, o_type);
+  auto pairs = std::vector<James::Bond::Pair>{pair_feo};
+  auto cutoffs = std::vector<double>{2.6};
+  James::Bond::add_distance_based_bonds(network, system, pairs, cutoffs);
+
+  // 6 bonds should have been created emanating from the Fe3+ center 
+  // We know the Fe ion has an index of 0
+  REQUIRE(network.n_edges(0) == 6);
+  // There should also only be a total of 6 bonds 
+  REQUIRE(network.n_edges() == 6);
+  
+  // ----------------------------------------------------------------------------
+  // Don't ignore hydrogens
+
+  // In this case, intramolecular water bonds will be needed to ensure connectivity
+  auto pair_oh = James::Bond::Pair(o_type, h_type);
+  pairs = std::vector<James::Bond::Pair>{pair_oh};
+  cutoffs = std::vector<double>{1.0};
+  James::Bond::add_distance_based_bonds(network, system, pairs, cutoffs);
+  // 6*2 new bonds were created
+  REQUIRE(network.n_edges() == 18);
+
+  // Information needed for hydrogen bonds
+  auto donor_atom_types = std::vector<int>{o_type};
+  auto acceptor_atom_types = std::vector<int>{cl_type, o_type};
+  auto h_atom_types = std::vector<int>{h_type};
+  double donor_acceptor_cutoff = 3.2;
+  double max_angle_deg = 30;
+  // Add the hydrogen bond between the H and the acceptor atom types (Cl and O)
+  James::Bond::add_hbonds(network, system, donor_atom_types,
+                          acceptor_atom_types, h_atom_types,
+                          donor_acceptor_cutoff, max_angle_deg, false);
+
+  // ----------------------------------------------------------------------------
+  // Ignore hydrogens: this is probably what we will end up doing for finding ion pairs
+  network.clear();
+  // Create the bonds from the Fe center to the water molecules (to the O atoms)
+  pairs = std::vector<James::Bond::Pair>{pair_feo};
+  cutoffs = std::vector<double>{2.6};
+  James::Bond::add_distance_based_bonds(network, system, pairs, cutoffs);
+
+  // No need for intramolecular water bonds 
+  // Add the hydrogen bond between the donors (O) and the acceptor atom types (Cl and O)
+  James::Bond::add_hbonds(network, system, donor_atom_types,
+                          acceptor_atom_types, h_atom_types,
+                          donor_acceptor_cutoff, max_angle_deg, true);
 }
