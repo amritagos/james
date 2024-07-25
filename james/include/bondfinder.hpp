@@ -1,5 +1,6 @@
 #pragma once
 #include "network_base.hpp"
+#include "pairtypes.hpp"
 #include "system.hpp"
 #include "util.hpp"
 #include <cstddef>
@@ -92,6 +93,73 @@ void add_hbonds(Graph::NetworkBase<WeightType> &network,
             }
           }
         }
+      }
+    }
+  }
+}
+
+/*
+Adds bonds based on a distance based criterion.
+An unordered_map of pair types and cutoffs will be created internally from the
+vector of Pair objects and corresponding cutoffs. For any pair of types not
+provided, no bond will be created.
+*/
+template <typename WeightType = double>
+void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
+                              const James::Atoms::System &system,
+                              std::vector<Pair> &pairs,
+                              std::vector<double> &cutoffs) {
+  // The number of Pair objects should correspond to an equal number of cutoff
+  // values
+  if (pairs.size() != cutoffs.size()) {
+    std::runtime_error("Inconsistent Pair and cutoff values\n");
+  }
+  auto pair_cutoff_map = create_pairtype_cutoffs(
+      pairs, cutoffs); // create an unordered_map with Pair objects as keys and
+                       // cutoffs as the values
+
+  // Loop through all i,j pairs of atoms
+  for (size_t i_idx = 0; i_idx < system.atoms.size() - 1; i_idx++) {
+    for (size_t j_idx = i_idx + 1; j_idx < system.atoms.size(); j_idx++) {
+      int i_type = system.atoms[i_idx].type;
+      int j_type = system.atoms[j_idx].type;
+      // If the key with the Pair i_type, j_type does not exist, then skip
+      if (pair_cutoff_map.contains(Pair(i_type, j_type == false))) {
+        continue;
+      }
+      // If the Pair exists, then the cutoff can be accessed
+      double cutoff = pair_cutoff_map[Pair(i_type, j_type)];
+      // Get the distance
+      double r_ij = system.distance(i_idx, j_idx);
+
+      // Check that the distance between the atoms is within the cutoff
+      if (r_ij <= cutoff) {
+        // Add the bond
+        network.push_back_neighbour_and_weight(i_idx, j_idx, 1.0);
+      }
+    }
+  }
+}
+
+/*
+Adds bonds based on a distance based criterion, using a global cutoff value and
+ignoring pair types.
+*/
+template <typename WeightType = double>
+void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
+                              const James::Atoms::System &system,
+                              double global_cutoff = 3.5) {
+
+  // Loop through all i,j pairs of atoms
+  for (size_t i_idx = 0; i_idx < system.atoms.size() - 1; i_idx++) {
+    for (size_t j_idx = i_idx + 1; j_idx < system.atoms.size(); j_idx++) {
+      // Get the distance
+      double r_ij = system.distance(i_idx, j_idx);
+
+      // Check that the distance between the atoms is within the cutoff
+      if (r_ij <= global_cutoff) {
+        // Add the bond
+        network.push_back_neighbour_and_weight(i_idx, j_idx, 1.0);
       }
     }
   }
