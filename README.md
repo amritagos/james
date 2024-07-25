@@ -38,8 +38,8 @@ to represent bonds in an atomic system (represented by the `System` class).
 ### Finding ion pairs 
 
 <p float="left">
-    <img src="https://github.com/amritagos/james/blob/develop/resources/oct_with_hydrogens.png?raw=true" width="600" />
-    <img src="https://github.com/amritagos/james/blob/develop/resources/oct_no_hydrogens.png?raw=true" width="600" />
+    <img src="https://github.com/amritagos/james/blob/develop/resources/oct_with_hydrogens.png?raw=true" width="300" />
+    <img src="https://github.com/amritagos/james/blob/develop/resources/oct_no_hydrogens.png?raw=true" width="300" />
 </p>
 
-Ion pairs can be found, provided that a network has been given in conjunction with a `System` object. Note that if you delete atoms in the `System` class or mess up the ordering, you will get errors unless you build the `UndirectedNetwork` object again. The ion pairs are found by searching for all shortest paths between a source and destination. Ion pairs should only contain water molcules in the middle and should have only ions at the end points. The images above show configurations where hydrogens are kept, and ignored, respectively. The procedure to check and find ion pairs would change slightly based on this. 
+Ion pairs can be found, provided that a network has been given in conjunction with a `System` object. Note that if you delete atoms in the `System` class or mess up the ordering, you will get errors unless you build the `UndirectedNetwork` object again. The ion pairs are found by searching for all shortest paths between a source and destination. Ion pairs should only contain water molcules in the middle and should have only ions at the end points. The images above show configurations where hydrogens are kept, and ignored, respectively. The labels correspond to the indices inside the `System` and `UndirectedNetwork` objects. The procedure to check and find ion pairs might change slightly based on whether hydrogens are included or not. 
