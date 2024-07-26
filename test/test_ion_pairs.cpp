@@ -1,6 +1,9 @@
 #include "bondfinder.hpp"
+#include "catch2/catch_message.hpp"
+#include "catch2/matchers/catch_matchers.hpp"
 #include "fmt/core.h"
 #include "pairtypes.hpp"
+#include "pathfinder.hpp"
 #include "system.hpp"
 #include "undirected_network.hpp"
 #include <catch2/catch_test_macros.hpp>
@@ -66,16 +69,17 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
   auto cutoffs = std::vector<double>{2.6};
   James::Bond::add_distance_based_bonds(network, system, pairs, cutoffs);
 
-  // 6 bonds should have been created emanating from the Fe3+ center 
+  // 6 bonds should have been created emanating from the Fe3+ center
   // We know the Fe ion has an index of 0
   REQUIRE(network.n_edges(0) == 6);
-  // There should also only be a total of 6 bonds 
+  // There should also only be a total of 6 bonds
   REQUIRE(network.n_edges() == 6);
-  
+
   // ----------------------------------------------------------------------------
   // Don't ignore hydrogens
 
-  // In this case, intramolecular water bonds will be needed to ensure connectivity
+  // In this case, intramolecular water bonds will be needed to ensure
+  // connectivity
   auto pair_oh = James::Bond::Pair(o_type, h_type);
   pairs = std::vector<James::Bond::Pair>{pair_oh};
   cutoffs = std::vector<double>{1.0};
@@ -94,16 +98,34 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
                           acceptor_atom_types, h_atom_types,
                           donor_acceptor_cutoff, max_angle_deg, false);
 
+  // Stuff needed for finding ion pairs (Fe and Cl at the end points)
+  size_t fe_index = 0; // In this case we know that Fe has an index of 0. I
+                       // would loop through the atoms ordinarily I guess
+  auto destination_atom_types = std::vector<int>{cl_type};
+  auto intermediate_atom_types = std::vector<int>{h_type, o_type};
+  int max_depth = 5;
+  // Expected ion pair paths
+  auto ion_pairs_with_h_required = std::vector<std::vector<int>>{
+      {1, 11, 10, 0}, {2, 5, 4, 0}, {3, 14, 13, 0}};
+  auto ion_pairs_with_hydrogens = James::Path::find_ion_pairs(
+      fe_index, network, system, destination_atom_types,
+      intermediate_atom_types, max_depth);
+  INFO(fmt::format("Number of ion pairs found is {}",
+                   ion_pairs_with_hydrogens.size()));
+  REQUIRE_THAT(ion_pairs_with_hydrogens,
+               Catch::Matchers::RangeEquals(ion_pairs_with_h_required));
   // ----------------------------------------------------------------------------
-  // Ignore hydrogens: this is probably what we will end up doing for finding ion pairs
+  // Ignore hydrogens: this is probably what we will end up doing for finding
+  // ion pairs
   network.clear();
   // Create the bonds from the Fe center to the water molecules (to the O atoms)
   pairs = std::vector<James::Bond::Pair>{pair_feo};
   cutoffs = std::vector<double>{2.6};
   James::Bond::add_distance_based_bonds(network, system, pairs, cutoffs);
 
-  // No need for intramolecular water bonds 
-  // Add the hydrogen bond between the donors (O) and the acceptor atom types (Cl and O)
+  // No need for intramolecular water bonds
+  // Add the hydrogen bond between the donors (O) and the acceptor atom types
+  // (Cl and O)
   James::Bond::add_hbonds(network, system, donor_atom_types,
                           acceptor_atom_types, h_atom_types,
                           donor_acceptor_cutoff, max_angle_deg, true);
