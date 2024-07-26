@@ -23,7 +23,8 @@ check_ion_pair_path(const std::vector<int> &test_path,
 
   if (test_path.size() > 2) {
     // Check the intermediate atom types (no need to check the end points)
-    for (size_t i_atom = 1; i_atom < test_path.size() - 1; i_atom++) {
+    for (size_t i = 1; i < test_path.size() - 1; i++) {
+      size_t i_atom = test_path[i];
       if (atom_type_found(intermediate_atom_types, system.atoms[i_atom].type) ==
           false) {
         return false;
@@ -86,14 +87,10 @@ find_ion_pairs(size_t source, Graph::NetworkBase<WeightType> &network,
           std::vector<int>{}; // Needed for recursive reconstruct_paths function
       Graph::reconstruct_paths(parent, shortest_paths, path, dest_idx);
       // Sanity check for the paths found
-      // for (auto &test_path : shortest_paths) {
-      //   if (check_ion_pair_path(test_path, system, intermediate_atom_types))
-      //   {
-      //     ion_pairs.push_back(test_path);
-      //   }
-      // }
-      for (auto test_path : shortest_paths) {
-        ion_pairs.push_back(test_path);
+      for (auto &test_path : shortest_paths) {
+        if (check_ion_pair_path(test_path, system, intermediate_atom_types)) {
+          ion_pairs.push_back(test_path);
+        }
       }
     }
   }
