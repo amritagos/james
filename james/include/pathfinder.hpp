@@ -67,7 +67,7 @@ find_ion_pairs(size_t source, Graph::NetworkBase<WeightType> &network,
   std::vector<std::vector<int>> ion_pairs{};
 
   // Perform the BFS over the graph upto max_depth
-  Graph::bfs(network, parent, depth_level, source, std::nullopt);
+  Graph::bfs(network, parent, depth_level, source, max_depth);
 
   // Go through atoms to find the destination atom types
   for (size_t dest_idx = 0; dest_idx < n_atoms; dest_idx++) {
