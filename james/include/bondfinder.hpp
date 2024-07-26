@@ -73,10 +73,6 @@ void add_hbonds(Graph::NetworkBase<WeightType> &network,
                   Misc::angleABCdeg(h_atom.position, donor.position,
                                     acceptor.position, system.box);
 
-              // Somehow we need to restrict the angle to less than 90
-              if (hda_angle > 90) {
-                hda_angle = 180 - hda_angle;
-              }
               if (hda_angle > max_angle_deg) {
                 continue;
               }
