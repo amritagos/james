@@ -2,6 +2,7 @@
 #include "catch2/catch_message.hpp"
 #include "catch2/matchers/catch_matchers.hpp"
 #include "fmt/core.h"
+#include "fmt/ostream.h"
 #include "pairtypes.hpp"
 #include "pathfinder.hpp"
 #include "system.hpp"
@@ -112,6 +113,7 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
       intermediate_atom_types, max_depth);
   INFO(fmt::format("Number of ion pairs found is {}",
                    ion_pairs_with_hydrogens.size()));
+
   REQUIRE_THAT(ion_pairs_with_hydrogens,
                Catch::Matchers::RangeEquals(ion_pairs_with_h_required));
   // ----------------------------------------------------------------------------
@@ -129,4 +131,16 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
   James::Bond::add_hbonds(network, system, donor_atom_types,
                           acceptor_atom_types, h_atom_types,
                           donor_acceptor_cutoff, max_angle_deg, true);
+
+  // Find the ion pairs and check them
+  auto ion_pairs_no_h_required =
+      std::vector<std::vector<int>>{{1, 10, 0}, {2, 4, 0}, {3, 13, 0}};
+  auto ion_pairs_no_hydrogens = James::Path::find_ion_pairs(
+      fe_index, network, system, destination_atom_types,
+      intermediate_atom_types, max_depth);
+  INFO(fmt::format("Number of ion pairs found (ignoring H) is {}",
+                   ion_pairs_with_hydrogens.size()));
+
+  REQUIRE_THAT(ion_pairs_no_hydrogens,
+               Catch::Matchers::RangeEquals(ion_pairs_no_h_required));
 }
