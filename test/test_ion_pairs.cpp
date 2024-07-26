@@ -143,4 +143,12 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
 
   REQUIRE_THAT(ion_pairs_no_hydrogens,
                Catch::Matchers::RangeEquals(ion_pairs_no_h_required));
+
+  // Check that if you set max_depth to 1 (maximum length of ion pair including
+  // ends would be 2), you will find zero ion pairs.
+  max_depth = 1;
+  ion_pairs_no_hydrogens = James::Path::find_ion_pairs(
+      fe_index, network, system, destination_atom_types,
+      intermediate_atom_types, max_depth);
+  REQUIRE(ion_pairs_no_hydrogens.size() == 0);
 }
