@@ -1,3 +1,4 @@
+#include "bondcorrel.hpp"
 #include "bondfinder.hpp"
 #include "catch2/matchers/catch_matchers.hpp"
 #include "fmt/core.h"
@@ -73,4 +74,11 @@ TEST_CASE("Test that a hydrogen bond can be found between a Cl- ion and water "
     INFO(fmt::format("HDA angle in degrees = {}\n", hda_angle));
     REQUIRE(hda_angle < 30);
   }
+
+  // Check that if you create a flattened array containing the hydrogen bond
+  // information of dissimilar (i,j) pairs, it is correct
+  auto c_ij_expected = std::vector<int>{0, 0, 0, 0, 1, 0};
+  auto c_ij = James::Bond::Correlation::bond_connection_info_at_tau(network);
+
+  REQUIRE_THAT(c_ij, Catch::Matchers::RangeEquals(c_ij_expected));
 }
