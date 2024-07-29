@@ -81,4 +81,15 @@ TEST_CASE("Test that a hydrogen bond can be found between a Cl- ion and water "
   auto c_ij = James::Bond::Correlation::bond_connection_info_at_tau(network);
 
   REQUIRE_THAT(c_ij, Catch::Matchers::RangeEquals(c_ij_expected));
+
+  // Should work for multiple networks too
+  auto networks =
+      std::vector<Graph::UndirectedNetwork<double>>{network, network};
+  auto c_ij_multiple_expected =
+      std::vector<std::vector<int>>{c_ij_expected, c_ij_expected};
+  auto c_ij_multiple =
+      James::Bond::Correlation::bond_connection_info_time_series(networks);
+
+  REQUIRE_THAT(c_ij_multiple,
+               Catch::Matchers::RangeEquals(c_ij_multiple_expected));
 }

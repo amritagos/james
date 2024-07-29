@@ -36,4 +36,21 @@ std::vector<int> bond_connection_info_at_tau(
 
   return c_ij;
 }
+
+/* Takes multiple `UndirectedNetwork` objects. */
+template <typename WeightType = double>
+std::vector<std::vector<int>> bond_connection_info_time_series(
+    const std::vector<Graph::UndirectedNetwork<WeightType>>
+        &network_time_series) {
+  std::vector<std::vector<int>>
+      c_ij_time_series{}; // vector of flattened vectors of c(i,j) pairs. 0 if
+                          // there is no connection and 1 if there is a
+                          // connection
+
+  for (auto &network : network_time_series) {
+    c_ij_time_series.push_back(bond_connection_info_at_tau(network));
+  }
+
+  return c_ij_time_series;
+}
 } // namespace James::Bond::Correlation
