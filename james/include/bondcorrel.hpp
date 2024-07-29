@@ -14,8 +14,8 @@ namespace James::Bond::Correlation {
  * between the atom itself).Takes the UndirectedNetwork as an
  * input. */
 template <typename WeightType = double>
-std::vector<int>
-bond_connection_info_at_tau(Graph::UndirectedNetwork<WeightType> &network) {
+std::vector<int> bond_connection_info_at_tau(
+    const Graph::UndirectedNetwork<WeightType> &network) {
   std::vector<int> c_ij{}; // flattened vector of c(i,j) pairs. 0 if there is no
                            // connection and 1 if there is a connection
   const size_t n_atoms = network.n_agents();
