@@ -88,7 +88,23 @@ TEST_CASE("Test that a hydrogen bond can be found between a Cl- ion and water "
   auto c_ij_multiple_expected =
       std::vector<std::vector<int>>{c_ij_expected, c_ij_expected};
   auto c_ij_multiple =
-      James::Bond::Correlation::bond_connection_info_time_series(networks);
+      James::Bond::Correlation::bond_connection_info_time_series(networks,
+                                                                 false);
+
+  REQUIRE_THAT(c_ij_multiple,
+               Catch::Matchers::RangeEquals(c_ij_multiple_expected));
+
+  // Multiple networks using the continuous hydrogen bond definition
+  auto network_empty = Graph::UndirectedNetwork<double>(system.n_atoms());
+  // Make the first network empty
+  networks[0] = network_empty;
+  c_ij_multiple_expected =
+      std::vector<std::vector<int>>{{0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}};
+  // The flattened array will just be empty since the first network was empty
+  // In the definition of the continuous hydrogen bond, bonds are considered
+  // broken even if reformed later.
+  c_ij_multiple = James::Bond::Correlation::bond_connection_info_time_series(
+      networks, true);
 
   REQUIRE_THAT(c_ij_multiple,
                Catch::Matchers::RangeEquals(c_ij_multiple_expected));
