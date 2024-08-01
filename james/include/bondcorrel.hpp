@@ -4,6 +4,7 @@
 #include "undirected_network.hpp"
 #include <cstddef>
 #include <optional>
+#include <stdexcept>
 #include <vector>
 
 namespace James::Bond::Correlation {
@@ -104,5 +105,36 @@ std::vector<std::vector<int>> bond_connection_info_time_series(
 
   return c_ij_time_series;
 }
+
+/* Calculate the correlation, at a single time origin (t0), given a lag time t
+ */
+template <typename T>
+std::optional<double>
+correlation_t_t0(const std::vector<std::vector<T>> &c_ij_time_series,
+                           size_t t0, size_t t) {
+  double unnorm_c_ij_val = 0.0;
+  double norm_factor = 0.0;
+  // Error handling
+  if (t0 >= c_ij_time_series.size() || t >= c_ij_time_series.size()) {
+    std::runtime_error("The time origin or lag time was greater than the "
+                       "number of timesteps.\n");
+  }
+  if (c_ij_time_series.size() == 0) {
+    std::runtime_error("Empty vector for bond information\n");
+  }
+  // Calculate the correlation function (average over the atoms, so over inner
+  // vector size)
+  for (size_t i_atom = 0; i_atom < c_ij_time_series[0].size(); i_atom++) {
+    unnorm_c_ij_val +=
+        c_ij_time_series[t0][i_atom] * c_ij_time_series[t][i_atom];
+    norm_factor += c_ij_time_series[t0][i_atom] * c_ij_time_series[t0][i_atom];
+  }
+  if (norm_factor != 0) {
+    return unnorm_c_ij_val / norm_factor;
+  } else {
+    return std::nullopt;
+  }
+}
+
 
 } // namespace James::Bond::Correlation
