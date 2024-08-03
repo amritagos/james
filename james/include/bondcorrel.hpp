@@ -110,8 +110,8 @@ std::vector<std::vector<int>> bond_connection_info_time_series(
  */
 template <typename T>
 std::optional<double>
-correlation_t_t0(const std::vector<std::vector<T>> &c_ij_time_series,
-                           size_t t0, size_t t) {
+correlation_t0_t(const std::vector<std::vector<T>> &c_ij_time_series, size_t t0,
+                 size_t t) {
   double unnorm_c_ij_val = 0.0;
   double norm_factor = 0.0;
   // Error handling
