@@ -2,6 +2,7 @@
 
 #include "network_base.hpp"
 #include "undirected_network.hpp"
+#include <cmath>
 #include <cstddef>
 #include <optional>
 #include <stdexcept>
@@ -136,5 +137,106 @@ correlation_t0_t(const std::vector<std::vector<T>> &c_ij_time_series, size_t t0,
   }
 }
 
+/*Time correlation function, returning the tau values, the normalized
+correlation function values, and the standard error in the correlation
+function values*/
+template <typename T>
+std::tuple<std::vector<double>, std::vector<std::optional<double>>,
+           std::vector<std::optional<double>>>
+time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
+                          const std::vector<double> &time, int max_tau,
+                          int start_t0, int start_tau, int delta_tau,
+                          int calc_upto_tau) {
+  //
+  // Lambda to calculate the mean of a vector of TCF values (over time origins)
+  // Skips std::nullopt values; returns this if the entire vector is
+  // std::nullopt
+  auto calc_mean = [&](const std::vector<std::optional<double>> &vec) {
+    int counter = 0;   // Non 0/0 values in the vector
+    double mean = 0.0; // Mean of the vector
+    for (auto &ele : vec) {
+      if (ele.has_value()) {
+        counter++;
+        mean += ele.value();
+      }
+    }
+    // Now divide by the number of non 0/0 values
+    if (counter > 0) {
+      return mean / counter;
+    } else {
+      return std::nullopt; // All values are nullopt
+    }
+  };
+
+  // Calculate the standard error
+  auto calc_stderr = [&](const std::vector<std::optional<double>> &vec,
+                         const std::optional<double> mean) {
+    int counter = 0; // Non 0/0 values in the vector
+    double std_error = 0.0;
+    if (mean == std::nullopt) {
+      return std::nullopt;
+    }
+    for (auto &ele : vec) {
+      if (ele.has_value()) {
+        counter++;
+        std_error +=
+            (ele.value() - mean.value()) * (ele.value() - mean.value());
+      }
+    }
+    // stderr = standard deviation/ sqrt(N)
+    // corrected sample stdev = sqrt( 1/(N-1) * sum(x-x_mean)^2 )
+    return sqrt(std_error / (counter * (counter - 1)));
+  };
+
+  // Lamba for filling up TCF values at the same lag time but different origins
+  auto lag_times_over_origins =
+      [&](std::vector<std::optional<double>> &tcf_values_at_lag_time,
+          int current_tau) {
+        for (size_t i = 0; i < tcf_values_at_lag_time.size(); i++) {
+          size_t t0 = i + start_t0;
+          size_t t = t0 + current_tau;
+          tcf_values_at_lag_time[i] = correlation_t0_t(c_ij_time_series, t0, t);
+        }
+      };
+
+  std::vector<double> tau_values; // Vector of lag times
+  std::vector<std::optional<double>>
+      tcf_avg; // Vector of the normalized TCF, averaged over all time origins
+               // for each lag time. std::nullopt when 0/0 is encountered
+  std::vector<std::optional<double>>
+      tcf_error; // Vector of the standard deviation errors in the TCF
+  int n_origins = max_tau - start_t0; // Number of time origins
+  std::vector<std::optional<double>> tcf_values_at_lag_time(
+      n_origins); // Vector of the normalized TCF for a particular lag time,
+                  // where each value corresponds to the lag time with respect
+                  // to a time origin
+  std::optional<double> mean_tcf,
+      std_error_tcf; // Current value of the mean and standard error
+
+  // Calculation of the TCF at a lag time=0
+  tau_values.push_back(time[start_t0]); // update the lag time
+  // Get the values of the TCF at all time origins
+  lag_times_over_origins(tcf_values_at_lag_time, 0);
+  // Get the mean and error, and update
+  mean_tcf = calc_mean(tcf_values_at_lag_time);
+  std_error_tcf = calc_stderr(tcf_values_at_lag_time, mean_tcf);
+  tcf_avg.push_back(mean_tcf);
+  tcf_error.push_back(std_error_tcf);
+
+  // Calculation of the TCF at different lag times,
+  // starting from start_tau
+  for (int i_tau = start_tau; i_tau <= calc_upto_tau; i_tau += delta_tau) {
+    tau_values.push_back(time[i_tau]); // Current lag time
+    // Get the TCF for this lag time over the desired time origins
+    lag_times_over_origins(tcf_values_at_lag_time, i_tau);
+    // Get the mean and error, and update
+    mean_tcf = calc_mean(tcf_values_at_lag_time);
+    std_error_tcf = calc_stderr(tcf_values_at_lag_time, mean_tcf);
+    tcf_avg.push_back(mean_tcf);
+    tcf_error.push_back(std_error_tcf);
+  } // end of loop through lag times
+
+  return std::make_tuple(tau_values, tcf_avg, tcf_error);
+}
 
 } // namespace James::Bond::Correlation
