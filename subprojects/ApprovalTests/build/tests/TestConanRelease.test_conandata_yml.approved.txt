@@ -1,0 +1,15 @@
+  1.1.0:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.1.1.0/ApprovalTests.v.1.1.0.hpp
+      sha256: single_header_sha
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.1.1.0/LICENSE"
+      sha256: licence_sha
+  1.1.1:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.1.1.1/ApprovalTests.v.1.1.1.hpp
+      sha256: single_header_sha
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.1.1.1/LICENSE"
+      sha256: licence_sha
+  1.1.2:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.1.1.2/ApprovalTests.v.1.1.2.hpp
+      sha256: single_header_sha
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.1.1.2/LICENSE"
+      sha256: licence_sha

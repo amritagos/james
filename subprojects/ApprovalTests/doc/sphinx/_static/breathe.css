@@ -1,0 +1,17 @@
+/* -- breathe specific styles ----------------------------------------------- */
+
+/* So enum value descriptions are displayed inline to the item */
+.breatheenumvalues li tt + p {
+    display: inline;
+}
+
+/* So parameter descriptions are displayed inline to the item */
+.breatheparameterlist li tt + p {
+    display: inline;
+}
+
+/* So Doxygen Member Groups are out-dented, to stand out from their content */
+.breathe-sectiondef-title.rubric {
+    width: inherit;
+    margin-left: -20px;
+}

@@ -1,0 +1,121 @@
+windows: start "" "/Applications/Araxis Merge.app/Contents/Utilities/compare" "a.txt" "b.txt"
+unix   : "/Applications/Araxis Merge.app/Contents/Utilities/compare" "a.txt" "b.txt" &
+cygwin : "$(cygpath '/Applications/Araxis Merge.app/Contents/Utilities/compare')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "/Applications/Beyond Compare.app/Contents/MacOS/bcomp" "a.txt" "b.txt"
+unix   : "/Applications/Beyond Compare.app/Contents/MacOS/bcomp" "a.txt" "b.txt" &
+cygwin : "$(cygpath '/Applications/Beyond Compare.app/Contents/MacOS/bcomp')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "/Applications/DiffMerge.app/Contents/MacOS/DiffMerge" "a.txt" "b.txt" -nosplash
+unix   : "/Applications/DiffMerge.app/Contents/MacOS/DiffMerge" "a.txt" "b.txt" -nosplash &
+cygwin : "$(cygpath '/Applications/DiffMerge.app/Contents/MacOS/DiffMerge')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -nosplash &
+
+windows: start "" "/Applications/Kaleidoscope.app/Contents/MacOS/ksdiff" "a.txt" "b.txt"
+unix   : "/Applications/Kaleidoscope.app/Contents/MacOS/ksdiff" "a.txt" "b.txt" &
+cygwin : "$(cygpath '/Applications/Kaleidoscope.app/Contents/MacOS/ksdiff')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "/Applications/p4merge.app/Contents/MacOS/p4merge" "a.txt" "b.txt"
+unix   : "/Applications/p4merge.app/Contents/MacOS/p4merge" "a.txt" "b.txt" &
+cygwin : "$(cygpath '/Applications/p4merge.app/Contents/MacOS/p4merge')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: cmd /S /C ""/Applications/Sublime Merge.app/Contents/SharedSupport/bin/smerge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt""
+unix   : "/Applications/Sublime Merge.app/Contents/SharedSupport/bin/smerge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt"
+cygwin : "$(cygpath '/Applications/Sublime Merge.app/Contents/SharedSupport/bin/smerge')" mergetool --no-wait "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -o "$(cygpath -aw 'b.txt')"
+
+windows: start "" "/Applications/kdiff3.app/Contents/MacOS/kdiff3" "a.txt" "b.txt" -m -o "b.txt"
+unix   : "/Applications/kdiff3.app/Contents/MacOS/kdiff3" "a.txt" "b.txt" -m -o "b.txt" &
+cygwin : "$(cygpath '/Applications/kdiff3.app/Contents/MacOS/kdiff3')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -m -o "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "/Applications/TkDiff.app/Contents/MacOS/tkdiff" "a.txt" "b.txt"
+unix   : "/Applications/TkDiff.app/Contents/MacOS/tkdiff" "a.txt" "b.txt" &
+cygwin : "$(cygpath '/Applications/TkDiff.app/Contents/MacOS/tkdiff')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" -d "a.txt" "b.txt"
+unix   : "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" -d "a.txt" "b.txt" &
+cygwin : "$(cygpath '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code')" -d "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "clion" nosplash diff "a.txt" "b.txt"
+unix   : "clion" nosplash diff "a.txt" "b.txt" &
+cygwin : "$(cygpath 'clion')" nosplash diff "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}TortoiseSVN\bin\TortoiseMerge.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}TortoiseSVN\bin\TortoiseMerge.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}TortoiseSVN\bin\TortoiseMerge.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}TortoiseSVN\bin\TortoiseIDiff.exe" /left:"a.txt" /right:"b.txt"
+unix   : "{ProgramFiles}TortoiseSVN\bin\TortoiseIDiff.exe" /left:"a.txt" /right:"b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}TortoiseSVN\bin\TortoiseIDiff.exe')" /left:"$(cygpath -aw 'a.txt')" /right:"$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}TortoiseGit\bin\TortoiseGitMerge.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}TortoiseGit\bin\TortoiseGitMerge.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}TortoiseGit\bin\TortoiseGitMerge.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}TortoiseGit\bin\TortoiseGitIDiff.exe" /left:"a.txt" /right:"b.txt"
+unix   : "{ProgramFiles}TortoiseGit\bin\TortoiseGitIDiff.exe" /left:"a.txt" /right:"b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}TortoiseGit\bin\TortoiseGitIDiff.exe')" /left:"$(cygpath -aw 'a.txt')" /right:"$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}Beyond Compare 3\BCompare.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}Beyond Compare 3\BCompare.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}Beyond Compare 3\BCompare.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}Beyond Compare 4\BCompare.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}Beyond Compare 4\BCompare.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}Beyond Compare 4\BCompare.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}WinMerge\WinMergeU.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}WinMerge\WinMergeU.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}WinMerge\WinMergeU.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}Araxis\Araxis Merge\Compare.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}Araxis\Araxis Merge\Compare.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}Araxis\Araxis Merge\Compare.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}Devart\Code Compare\CodeCompare.exe" "a.txt" "b.txt"
+unix   : "{ProgramFiles}Devart\Code Compare\CodeCompare.exe" "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}Devart\Code Compare\CodeCompare.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: cmd /S /C ""{ProgramFiles}Sublime Merge\smerge.exe" mergetool --no-wait "a.txt" "b.txt" -o "b.txt""
+unix   : "{ProgramFiles}Sublime Merge\smerge.exe" mergetool --no-wait "a.txt" "b.txt" -o "b.txt"
+cygwin : "$(cygpath '{ProgramFiles}Sublime Merge\smerge.exe')" mergetool --no-wait "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -o "$(cygpath -aw 'b.txt')"
+
+windows: start "" "{ProgramFiles}KDiff3\bin\kdiff3.exe" "a.txt" "b.txt" -m -o "b.txt"
+unix   : "{ProgramFiles}KDiff3\bin\kdiff3.exe" "a.txt" "b.txt" -m -o "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}KDiff3\bin\kdiff3.exe')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -m -o "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "{ProgramFiles}Microsoft VS Code\Code.exe" -d "a.txt" "b.txt"
+unix   : "{ProgramFiles}Microsoft VS Code\Code.exe" -d "a.txt" "b.txt" &
+cygwin : "$(cygpath '{ProgramFiles}Microsoft VS Code\Code.exe')" -d "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "bcompare" "a.txt" "b.txt"
+unix   : "bcompare" "a.txt" "b.txt" &
+cygwin : "$(cygpath 'bcompare')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "meld" "a.txt" "b.txt"
+unix   : "meld" "a.txt" "b.txt" &
+cygwin : "$(cygpath 'meld')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+windows: cmd /S /C ""/snap/bin/sublime-merge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt""
+unix   : "/snap/bin/sublime-merge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt"
+cygwin : "$(cygpath '/snap/bin/sublime-merge')" mergetool --no-wait "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -o "$(cygpath -aw 'b.txt')"
+
+windows: cmd /S /C ""/var/lib/flatpak/exports/bin/com.sublimemerge.App" mergetool --no-wait "a.txt" "b.txt" -o "b.txt""
+unix   : "/var/lib/flatpak/exports/bin/com.sublimemerge.App" mergetool --no-wait "a.txt" "b.txt" -o "b.txt"
+cygwin : "$(cygpath '/var/lib/flatpak/exports/bin/com.sublimemerge.App')" mergetool --no-wait "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -o "$(cygpath -aw 'b.txt')"
+
+windows: cmd /S /C ""smerge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt""
+unix   : "smerge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt"
+cygwin : "$(cygpath 'smerge')" mergetool --no-wait "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -o "$(cygpath -aw 'b.txt')"
+
+windows: cmd /S /C ""/opt/sublime_merge/sublime_merge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt""
+unix   : "/opt/sublime_merge/sublime_merge" mergetool --no-wait "a.txt" "b.txt" -o "b.txt"
+cygwin : "$(cygpath '/opt/sublime_merge/sublime_merge')" mergetool --no-wait "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -o "$(cygpath -aw 'b.txt')"
+
+windows: start "" "kdiff3" "a.txt" "b.txt" -m -o "b.txt"
+unix   : "kdiff3" "a.txt" "b.txt" -m -o "b.txt" &
+cygwin : "$(cygpath 'kdiff3')" "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" -m -o "$(cygpath -aw 'b.txt')" &
+
+windows: start "" "code" -d "a.txt" "b.txt"
+unix   : "code" -d "a.txt" "b.txt" &
+cygwin : "$(cygpath 'code')" -d "$(cygpath -aw 'a.txt')" "$(cygpath -aw 'b.txt')" &
+
+

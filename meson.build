@@ -17,6 +17,7 @@ tests = [
   ['Test_Distance_Bonds', 'test/test_dist_bonds.cpp'],
   ['Ion_Pairs', 'test/test_ion_pairs.cpp'],
   ['Test_Correl', 'test/test_correlation.cpp'],
+  ['Test_App', 'test/test_approval.cpp'],
 ]
 
 test_inc = []
@@ -24,11 +25,21 @@ test_inc += inc
 
 Catch2 = dependency('Catch2', method : 'cmake', modules : ['Catch2::Catch2WithMain', 'Catch2::Catch2'])
 
+cmake = import('cmake')
+opt_var = cmake.subproject_options()
+opt_var.add_cmake_defines({'APPROVAL_TESTS_ENABLE_CODE_COVERAGE':false, 'APPROVAL_TESTS_BUILD_TESTING': false, 'APPROVAL_TESTS_BUILD_EXAMPLES':false, 'NOT_SUBPROJECT':false})
+
+# Configure the CMake project (ApprovalTests)
+approval_tests = cmake.subproject('ApprovalTests')
+
+# Fetch the dependency object
+app_lib = approval_tests.dependency('ApprovalTests')
+
 fmt_dep = dependency('fmt')
 
 foreach t : tests
   exe = executable(t.get(0), t.get(1),
-    dependencies : [Catch2, fmt_dep, graphlib_dep],
+    dependencies : [Catch2, fmt_dep, graphlib_dep, app_lib],
     include_directories : test_inc
   )
   test(t.get(0), exe, workdir : meson.project_source_root())

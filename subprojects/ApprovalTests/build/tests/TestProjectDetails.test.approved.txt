@@ -1,0 +1,12 @@
+{
+    "conan_directory_name": "approvaltests.cpp",
+    "github_project_name": "ApprovalTests.cpp",
+    "library_folder_name": "ApprovalTests",
+    "macro_prefix": "APPROVAL_TESTS",
+    "simulated_single_header_file": "ApprovalTests.hpp",
+    "update_conan": true,
+    "update_documentation": true,
+    "update_vcpkg": true,
+    "vcpkg_directory_name": "approval-tests-cpp",
+    "version_header": "ApprovalTestsVersion.h"
+}

@@ -1,0 +1,7 @@
+{
+    "build_dir": "../build",
+    "release_dir": "../build/releases",
+    "release_notes_dir": "../build/release_notes",
+    "template_release_notes_path": "../build/release_notes/relnotes_template.md",
+    "xxx_release_notes_path": "../build/relnotes_x.y.z.md"
+}

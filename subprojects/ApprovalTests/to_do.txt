@@ -1,0 +1,40 @@
+IMPROVE USABILITY OF CURRENT FEATURES
+
+. use a disposer for GoogleConfiguration::addIgnorableTestCaseNameSuffix() - to make it reversible
+
+NEW FEATURES
+
+. catch reporter
+. maps
+. reports
+. asJson
+. loggers
+. scrubbers
+. make SystemLauncher on Windows use the 'where' command
+. more linux diff programs (https://www.tecmint.com/best-linux-file-diff-tools-comparison/)
+
+TESTS
+
+. add tests of images (and verify that this works in Araxis Merge too - use Type::TEXT_AND_IMAGE)
+. try using C++17's filesystem to simplify tests - may need to support <experimental/filesystem> too - and may need -lstdc++fs
+
+DOCUMENTATION
+
+. short video intro - from downloading to running the first test - like https://www.youtube.com/watch?v=jeDecsGVbc4
+. document use of converter objects - see comment in #6
+. hook Simon Cropp's code mechanism into github pre-commit mechanism
+
+RELEASES
+
+. get cmake to generate build from command line (to remove requirement that CLion needs to have built starter project)
+. include licence in released header
+
+CODE QUALITY
+
+. Clean up CIBuildOnlyReporter
+. run through static analysis tools
+. memory leaks in our tests
+
+ENVIRONMENT AND BUILDS
+
+. fix issues in source code with eol warnings in clion on PC (little red crlf warnings)

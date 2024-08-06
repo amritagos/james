@@ -1,0 +1,15 @@
+*****************************************************************************
+*                                                                           *
+* Hello from Approval Tests.
+*
+* It looks like your program is calling some code that requires knowledge of
+* the location of the main() in your source tree.
+*
+* To do this, add the following to your main.cpp file:
+*
+*     APPROVAL_TESTS_REGISTER_MAIN_DIRECTORY
+*
+* Currently, this is only required if you are using TemplatedCustomNamer's
+* {RelativeTestSourceDirectory}.
+*                                                                           *
+*****************************************************************************

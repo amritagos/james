@@ -1,0 +1,260 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '16 0 * * 3,6'  # <https://crontab.guru/#16_0_*_*_3,6> - "At 00:16 on Wednesday and Saturday."
+
+jobs:
+  clang-format-and-update-docs:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@master
+      - uses: DoozyX/clang-format-lint-action@v0.17
+        with:
+          source: '.'
+          exclude: './third_party'
+          inplace: True
+          clangFormatVersion: 9
+      - name: Run MarkdownSnippets
+        run: |
+          dotnet tool install --global MarkdownSnippets.Tool
+          ./run_markdown_templates.sh
+        shell: bash
+      - uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Clang GitHub Action
+          author_email: actions@github.com
+          message: '. rd Reformat with clang-format and/or update snippets'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Commented-out, as it keeps failing with http 429 error - too many requests
+  # e.g. https://github.com/approvals/ApprovalTests.cpp/runs/541867195
+  #  markdown-link-check:
+  #    runs-on: ubuntu-20.04
+  #    steps:
+  #      - uses: actions/checkout@master
+  #      - uses: actions/setup-node@v1
+  #        with:
+  #          node-version: '12.x'
+  #      - name: Install markdown-link-check
+  #        run: npm i -g markdown-link-check
+  #      - name: Run markdown-link-check on *.md files
+  #        run: ./scripts/check_links.sh
+
+  Linux:
+    needs: clang-format-and-update-docs
+    # if: false # Disable this platform temporarily
+    runs-on: ubuntu-${{ matrix.os-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - job-name: 'clang10'
+            os-version: '20.04'
+            c-compiler: 'clang-10'
+            cxx-compiler: 'clang++-10'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+          - job-name: 'clang11'
+            os-version: '20.04'
+            c-compiler: 'clang-11'
+            cxx-compiler: 'clang++-11'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+          - job-name: 'clang12'
+            os-version: '20.04'
+            c-compiler: 'clang-12'
+            cxx-compiler: 'clang++-12'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+#           Couldn't figure out how to make it find <limit>
+#          - job-name: 'clang13'
+#            os-version: '22.04'
+#            c-compiler: 'clang-13'
+#            cxx-compiler: 'clang++-13'
+#            generator: '"Unix Makefiles" "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -std=c++20"'
+#            relative_build_dir_path: ''
+
+          - job-name: 'clang14'
+            os-version: '22.04'
+            c-compiler: 'clang-14'
+            cxx-compiler: 'clang++-14'
+            generator: '"Unix Makefiles" "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -std=c++20"'
+            relative_build_dir_path: ''
+
+          - job-name: 'clang15'
+            os-version: '22.04'
+            c-compiler: 'clang-15'
+            cxx-compiler: 'clang++-15'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+          - job-name: 'gcc9'
+            os-version: '20.04'
+            c-compiler: 'gcc-9'
+            cxx-compiler: 'g++-9'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+          - job-name: 'gcc10'
+            os-version: '20.04'
+            c-compiler: 'gcc-10'
+            cxx-compiler: 'g++-10'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+          - job-name: 'gcc10 unity'
+            os-version: '20.04'
+            c-compiler: 'gcc-10'
+            cxx-compiler: 'g++-10'
+            generator: '"Unix Makefiles" -DCMAKE_UNITY_BUILD=yes'
+            relative_build_dir_path: ''
+
+          - job-name: 'gcc10 ninja in-source'
+            os-version: '20.04'
+            c-compiler: 'gcc-10'
+            cxx-compiler: 'g++-10'
+            generator: '"Ninja"'
+            relative_build_dir_path: ''
+
+          - job-name: 'gcc10 ninja out-of-source'
+            os-version: '20.04'
+            c-compiler: 'gcc-10'
+            cxx-compiler: 'g++-10'
+            generator: '"Ninja"'
+            relative_build_dir_path: '../'
+
+          - job-name: 'gcc10 ninja-unity'
+            os-version: '20.04'
+            c-compiler: 'gcc-10'
+            cxx-compiler: 'g++-10'
+            generator: '"Ninja" -DCMAKE_UNITY_BUILD=yes'
+            relative_build_dir_path: ''
+
+    name: Linux ${{ matrix.job-name }}
+    env:
+      BUILD_PATH: ${{ github.workspace }}/${{ matrix.relative_build_dir_path }}build_space
+      CC: ${{ matrix.c-compiler }}
+      CXX: ${{ matrix.cxx-compiler }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: seanmiddleditch/gha-setup-ninja@v4
+        if: contains(matrix.generator, 'Ninja')
+
+      - name: install boost
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libboost-all-dev
+
+      - uses: ./.github/actions/build-and-test
+
+  macOS:
+    needs: clang-format-and-update-docs
+    # if: false # Disable this platform temporarily
+    runs-on: macos-${{ matrix.os-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - job-name: xcode-15.4
+            os-version: 'latest'
+            xcode-version: '15.4'
+            generator: '"Unix Makefiles"'
+            relative_build_dir_path: ''
+
+          - job-name: 'xcode-15.4-ninja in-source'
+            xcode-version: '15.4'
+            os-version: 'latest'
+            generator: '"Ninja"'
+            relative_build_dir_path: ''
+
+          - job-name: 'xcode-15.4-ninja out-of-source'
+            xcode-version: '15.4'
+            os-version: 'latest'
+            generator: '"Ninja"'
+            relative_build_dir_path: '../'
+
+    name: macOS ${{ matrix.job-name }}
+    env:
+      BUILD_PATH: ${{ github.workspace }}/${{ matrix.relative_build_dir_path }}build_space
+      HOMEBREW_NO_ANALYTICS: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      DEVELOPER_DIR: '/Applications/Xcode_${{ matrix.xcode-version }}.app/Contents/Developer'
+    steps:
+      - uses: actions/checkout@master
+      - uses: seanmiddleditch/gha-setup-ninja@v4
+        if: contains(matrix.generator, 'Ninja')
+
+      - name: install boost
+        run: |
+          brew install boost
+
+      - uses: ./.github/actions/build-and-test
+
+  Windows:
+    needs: clang-format-and-update-docs
+    # if: false # Disable this platform temporarily
+    runs-on: windows-${{ matrix.os-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - job-name: VS-2019
+            os-version: '2019'
+            generator: '"Visual Studio 16 2019"'
+
+          - job-name: VS-2019 (clangcl)
+            os-version: '2019'
+            generator: '"Visual Studio 16 2019" -T "clangcl"'
+
+          - job-name: VS-latest
+            os-version: 'latest'
+            generator: '"Visual Studio 17 2022"'
+
+          - job-name: VS-latest (clangcl)
+            os-version: 'latest'
+            generator: '"Visual Studio 17 2022" -T "clangcl"'
+
+    name: Windows ${{ matrix.job-name }}
+    env:
+      BUILD_PATH: ${{ github.workspace }}/build_space
+    steps:
+      - uses: actions/checkout@master
+
+      - name: set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: ./.github/actions/setup-conan
+
+      - name: install boost
+        run: |
+          ${boostroot} = "${env:GITHUB_WORKSPACE}\boost_install"
+          conan install boost/1.72.0@ -o boost:header_only=True -g deploy --install-folder ${boostroot}
+          echo "BOOST_ROOT=${boostroot}\boost" >> ${env:GITHUB_ENV}
+
+      # DOS paths - with backslashes - are not compatible with the github bash
+      # shell that is invoked in build-and-test/actions.yml - so sadly the code
+      # in that file is pasted in here
+      # - uses: ./.github/actions/build-and-test
+      - name: configure
+        run: |
+          mkdir ${{ env.BUILD_PATH }}
+          cd ${{ env.BUILD_PATH }}
+          cmake --version
+          cmake -G ${{ matrix.generator }} ${{ github.workspace }} -DCMAKE_BUILD_TYPE=Debug
+      - name: build
+        run: |
+          cd ${{ env.BUILD_PATH }}
+          cmake --build . --parallel 4
+      - name: test
+        run: |
+          cd ${{ env.BUILD_PATH }}
+          ctest --verbose --output-on-failure -C Debug
