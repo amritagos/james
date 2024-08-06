@@ -89,7 +89,7 @@ TEST_CASE("Test that a hydrogen bond can be found between a Cl- ion and water "
       std::vector<std::vector<int>>{c_ij_expected, c_ij_expected};
   auto c_ij_multiple =
       James::Bond::Correlation::bond_connection_info_time_series(networks,
-                                                                 false, 1);
+                                                                 false);
 
   REQUIRE_THAT(c_ij_multiple,
                Catch::Matchers::RangeEquals(c_ij_multiple_expected));
@@ -104,7 +104,7 @@ TEST_CASE("Test that a hydrogen bond can be found between a Cl- ion and water "
   // In the definition of the continuous hydrogen bond, bonds are considered
   // broken even if reformed later.
   c_ij_multiple = James::Bond::Correlation::bond_connection_info_time_series(
-      networks, true, 1);
+      networks, true);
 
   REQUIRE_THAT(c_ij_multiple,
                Catch::Matchers::RangeEquals(c_ij_multiple_expected));
