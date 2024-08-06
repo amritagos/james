@@ -153,10 +153,9 @@ template <typename T>
 std::tuple<std::vector<double>, std::vector<std::optional<double>>,
            std::vector<std::optional<double>>>
 time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
-                          const std::vector<double> &time, int max_tau,
-                          int start_t0, int start_tau, int delta_tau,
-                          int calc_upto_tau) {
-  //
+                          const std::vector<double> &time, int start_t0,
+                          int start_tau, int delta_tau,
+                          std::optional<int> calc_upto_tau = std::nullopt) {
   // Lambda to calculate the mean of a vector of TCF values (over time origins)
   // Skips std::nullopt values; returns this if the entire vector is
   // std::nullopt
@@ -207,7 +206,20 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
           tcf_values_at_lag_time[i] = correlation_t0_t(c_ij_time_series, t0, t);
         }
       };
+  // -----------------------------
+  // Handling the value of calc_upto_tau
+  int max_tau = static_cast<int>(0.5 * c_ij_time_series.size());
 
+  if (calc_upto_tau.has_value()) {
+    if (calc_upto_tau.value() > max_tau) {
+      fmt::print("Warning: You set calc_upto_tau to a value greater than "
+                 "max_tau. Setting to max_tau.\n");
+      calc_upto_tau.value() = max_tau;
+    }
+  } else {
+    calc_upto_tau.value() = max_tau;
+  }
+  // -----------------------------
   std::vector<double> tau_values; // Vector of lag times
   std::vector<std::optional<double>>
       tcf_avg; // Vector of the normalized TCF, averaged over all time origins
@@ -234,7 +246,8 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
 
   // Calculation of the TCF at different lag times,
   // starting from start_tau
-  for (int i_tau = start_tau; i_tau <= calc_upto_tau; i_tau += delta_tau) {
+  for (int i_tau = start_tau; i_tau <= calc_upto_tau.value();
+       i_tau += delta_tau) {
     tau_values.push_back(time[i_tau]); // Current lag time
     // Get the TCF for this lag time over the desired time origins
     lag_times_over_origins(tcf_values_at_lag_time, i_tau);
