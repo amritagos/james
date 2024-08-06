@@ -139,13 +139,19 @@ correlation_t0_t(const std::vector<std::vector<T>> &c_ij_time_series, size_t t0,
 
 /*Time correlation function, returning the tau values, the normalized
 correlation function values, and the standard error in the correlation
-function values*/
+function values.
+ - start_t0: the index of the first time origin. Default value = 0
+ - start_tau: first time lag (inclusive). Default value = 1.
+ - delta_tau: Step size in the time lag. Default value = 1.
+ - calc_upto_tau: represents the index. By default (also if set
+to nullopt), this is half of the total number of steps in the c_ij_time_series
+*/
 template <typename T>
 std::tuple<std::vector<double>, std::vector<std::optional<double>>,
            std::vector<std::optional<double>>>
 time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
-                          const std::vector<double> &time, int start_t0,
-                          int start_tau, int delta_tau,
+                          const std::vector<double> &time, int start_t0 = 0,
+                          int start_tau = 1, int delta_tau = 1,
                           std::optional<int> calc_upto_tau = std::nullopt) {
   // Lambda to calculate the mean of a vector of TCF values (over time origins)
   // Skips std::nullopt values; returns this if the entire vector is
@@ -153,6 +159,7 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
   auto calc_mean = [&](const std::vector<std::optional<double>> &vec) {
     int counter = 0;   // Non 0/0 values in the vector
     double mean = 0.0; // Mean of the vector
+    std::optional<double> result = std::nullopt;
     for (auto &ele : vec) {
       if (ele.has_value()) {
         counter++;
@@ -161,10 +168,10 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
     }
     // Now divide by the number of non 0/0 values
     if (counter > 0) {
-      return mean / counter;
-    } else {
-      return std::nullopt; // All values are nullopt
+      result = mean / counter;
     }
+    // Otherwise, all values are nullopt, and that will be returned
+    return result;
   };
 
   // Calculate the standard error
@@ -172,8 +179,9 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
                          const std::optional<double> mean) {
     int counter = 0; // Non 0/0 values in the vector
     double std_error = 0.0;
+    std::optional<double> result = std::nullopt;
     if (mean == std::nullopt) {
-      return std::nullopt;
+      return result;
     }
     for (auto &ele : vec) {
       if (ele.has_value()) {
@@ -184,7 +192,8 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
     }
     // stderr = standard deviation/ sqrt(N)
     // corrected sample stdev = sqrt( 1/(N-1) * sum(x-x_mean)^2 )
-    return sqrt(std_error / (counter * (counter - 1)));
+    result = sqrt(std_error / (counter * (counter - 1)));
+    return result;
   };
 
   // Lamba for filling up TCF values at the same lag time but different origins
@@ -199,16 +208,27 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
       };
   // -----------------------------
   // Handling the value of calc_upto_tau
-  int max_tau = static_cast<int>(0.5 * c_ij_time_series.size());
+  const int n_frames = c_ij_time_series.size();
+  int max_tau = static_cast<int>(0.5 * n_frames);
+  // For odd n_frames, max_tau must be inclusive, so increment by 1
+  if (n_frames % 2 != 0) {
+    max_tau += 1;
+  }
 
   if (calc_upto_tau.has_value()) {
     if (calc_upto_tau.value() > max_tau) {
       fmt::print("Warning: You set calc_upto_tau to a value greater than "
                  "max_tau. Setting to max_tau.\n");
-      calc_upto_tau.value() = max_tau;
+      calc_upto_tau = max_tau;
     }
   } else {
-    calc_upto_tau.value() = max_tau;
+    calc_upto_tau = max_tau;
+  }
+  // -----------------------------
+  // Error handling for the time
+  if (time.size() < calc_upto_tau) {
+    throw std::invalid_argument("The size of the time vector is incompatible "
+                                "with that of the bond information array");
   }
   // -----------------------------
   std::vector<double> tau_values; // Vector of lag times
@@ -237,7 +257,7 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
 
   // Calculation of the TCF at different lag times,
   // starting from start_tau
-  for (int i_tau = start_tau; i_tau <= calc_upto_tau.value();
+  for (int i_tau = start_tau; i_tau < calc_upto_tau.value();
        i_tau += delta_tau) {
     tau_values.push_back(time[i_tau]); // Current lag time
     // Get the TCF for this lag time over the desired time origins
