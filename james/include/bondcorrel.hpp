@@ -78,22 +78,31 @@ std::vector<int> continuous_bond_connection_info_at_tau(
   return c_ij;
 }
 
-/* Takes multiple `UndirectedNetwork` objects. */
+/* Takes multiple `UndirectedNetwork` objects. Downsamples if skip_every is set
+ * to a value of more than 1.*/
 template <typename WeightType = double>
 std::vector<std::vector<int>> bond_connection_info_time_series(
     const std::vector<Graph::UndirectedNetwork<WeightType>>
         &network_time_series,
-    bool continuous_bond = false) {
+    bool continuous_bond = false, int skip_every = 1) {
   std::vector<std::vector<int>>
       c_ij_time_series{}; // vector of flattened vectors of c(i,j) pairs. 0 if
                           // there is no connection and 1 if there is a
                           // connection
+  // Error handling of skip_every
+  if (skip_every <= 0) {
+    throw std::invalid_argument(
+        fmt::format("You entered an invalid value of {} for skip_every, which "
+                    "must be 1 or greater.",
+                    skip_every));
+  }
   if (continuous_bond & (network_time_series.size() > 0)) {
     // First timestep
     auto c_ij = bond_connection_info_at_tau(network_time_series[0]);
     c_ij_time_series.push_back(c_ij);
     // Next timesteps (skip the first one)
-    for (size_t i_step = 1; i_step < network_time_series.size(); i_step++) {
+    for (size_t i_step = 1; i_step < network_time_series.size();
+         i_step += skip_every) {
       c_ij = continuous_bond_connection_info_at_tau(network_time_series[i_step],
                                                     c_ij);
       c_ij_time_series.push_back(c_ij);
