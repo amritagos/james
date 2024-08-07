@@ -17,6 +17,7 @@ tests = [
   ['Test_Distance_Bonds', 'test/test_dist_bonds.cpp'],
   ['Ion_Pairs', 'test/test_ion_pairs.cpp'],
   ['Test_Correl', 'test/test_correlation.cpp'],
+  ['Test_IO', 'test/test_io.cpp'],
 ]
 
 test_inc = []
