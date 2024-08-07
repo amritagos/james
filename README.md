@@ -13,10 +13,12 @@ micromamba create -f environment.yml
 micromamba activate seldonenv
 ```
 
-We use `meson` to compile and build `bondfinder`. 
+We use `meson` to compile and build `james`. 
 
 ```bash
-meson setup build
+rm -rf subprojects 
+git restore subprojects
+meson setup build --wipe
 meson compile -C build
 ```
 

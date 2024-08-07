@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fmt/core.h"
 #include <cmath>
 #include <cstddef>
 #include <optional>
@@ -99,6 +100,27 @@ angleABCdeg(const std::vector<double> &A, const std::vector<double> &B,
   // Convert to degrees
   double angleDegrees = angleABC(A, B, C, box) * (180.0 / M_PI);
   return angleDegrees;
+}
+
+// Downsample a vector such that skip_every steps are skipped. Can only accept
+// values greater than 0.
+template <typename T>
+std::vector<T> downsample(const std::vector<T> &vec, int skip_every) {
+  // Create a new vector to hold the downsampled vector
+  auto results = std::vector<T>{};
+  // Error handling of skip_every
+  if (skip_every <= 0) {
+    throw std::invalid_argument(
+        fmt::format("You entered an invalid value of {} for skip_every, which "
+                    "must be 1 or greater.",
+                    skip_every));
+  }
+
+  for (size_t i = 0; i < vec.size(); i++) {
+    results.push_back(vec[i]);
+  }
+
+  return results;
 }
 
 } // namespace James::Misc

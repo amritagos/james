@@ -1,7 +1,7 @@
 [wrap-git]
 directory=graph_lib
 url=https://github.com/seldon-code/graph_lib.git
-revision=9e569e1166cb00cd34ca0a78adf80721e9ca4a5b
+revision=f2122d880ae33b81f7a7115cf713c4dd3175f512
 depth=1
 
 [provide]
