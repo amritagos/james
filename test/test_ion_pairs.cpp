@@ -110,7 +110,7 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
       {1, 11, 10, 0}, {2, 5, 4, 0}, {3, 14, 13, 0}};
   auto ion_pairs_with_hydrogens = James::Path::find_ion_pairs(
       fe_index, network, system, destination_atom_types,
-      intermediate_atom_types, max_depth);
+      intermediate_atom_types, max_depth, James::Path::WriteIdentifier::Index);
   INFO(fmt::format("Number of ion pairs found is {}",
                    ion_pairs_with_hydrogens.size()));
 
@@ -137,7 +137,7 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
       std::vector<std::vector<int>>{{1, 10, 0}, {2, 4, 0}, {3, 13, 0}};
   auto ion_pairs_no_hydrogens = James::Path::find_ion_pairs(
       fe_index, network, system, destination_atom_types,
-      intermediate_atom_types, max_depth);
+      intermediate_atom_types, max_depth, James::Path::WriteIdentifier::Index);
   INFO(fmt::format("Number of ion pairs found (ignoring H) is {}",
                    ion_pairs_with_hydrogens.size()));
 

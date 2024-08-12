@@ -3,9 +3,20 @@
 #include "network_operations.hpp"
 #include "system.hpp"
 #include <cstddef>
+#include <cstdio>
 #include <vector>
 
 namespace James::Path {
+
+enum class WriteIdentifier { AtomID, Index };
+
+/* Converts a path with indices in it to atom IDs from the System object */
+inline void convert_path_to_ids(std::vector<int> &path,
+                                const James::Atoms::System &system) {
+  for (auto &ele : path) {
+    ele = system.atoms[ele].id;
+  }
+}
 
 /*Checks to make sure that intermediate members are only of the allowed atom
  * types. This is only an issue if the size is greater than 2, since the end
@@ -50,7 +61,8 @@ find_ion_pairs(size_t source, Graph::NetworkBase<WeightType> &network,
                const James::Atoms::System &system,
                const std::vector<int> &destination_atom_types,
                const std::vector<int> &intermediate_atom_types,
-               std::optional<int> max_depth) {
+               std::optional<int> max_depth,
+               WriteIdentifier identifier = WriteIdentifier::AtomID) {
   // Lambda for checking if a particular atom type (target) is one of allowed
   // atom types
   auto atom_type_found = [&](const std::vector<int> &atom_types, int target) {
@@ -89,7 +101,12 @@ find_ion_pairs(size_t source, Graph::NetworkBase<WeightType> &network,
       // Sanity check for the paths found
       for (auto &test_path : shortest_paths) {
         if (check_ion_pair_path(test_path, system, intermediate_atom_types)) {
-          ion_pairs.push_back(test_path);
+          if (identifier == WriteIdentifier::AtomID) {
+            convert_path_to_ids(test_path, system);
+            ion_pairs.push_back(test_path);
+          } else if (identifier == WriteIdentifier::Index) {
+            ion_pairs.push_back(test_path);
+          }
         }
       }
     }
