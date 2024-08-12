@@ -40,4 +40,10 @@ TEST_CASE("Test the system", "[System]") {
   // Should return an empty vector if there are no matches
   auto empty_indices = system.find_atoms_in_molecule(4);
   REQUIRE(empty_indices.size() == 0);
+
+  // Check the molecule IDs
+  std::vector<int> mol_ids_expected{1, 2, 1, 1};
+  for (int i = 0; i < system.n_atoms(); i++) {
+    REQUIRE(system.atoms[i].mol_id.value() == mol_ids_expected[i]);
+  }
 }
