@@ -149,6 +149,17 @@ TEST_CASE("Test that ion pairs can be found for a system with an Fe3+ center, "
   max_depth = 1;
   ion_pairs_no_hydrogens = James::Path::find_ion_pairs(
       fe_index, network, system, destination_atom_types,
-      intermediate_atom_types, max_depth);
+      intermediate_atom_types, max_depth, James::Path::WriteIdentifier::AtomID);
   REQUIRE(ion_pairs_no_hydrogens.size() == 0);
+
+  // Show that you can find ion pair paths such that each element is the atom
+  // ID, not the index in the System object
+  max_depth = 3; // inclusive
+  auto ion_pairs_no_h_required_ids =
+      std::vector<std::vector<int>>{{2, 11, 1}, {3, 5, 1}, {4, 14, 1}};
+  auto ion_pairs_no_hydrogens_ids = James::Path::find_ion_pairs(
+      fe_index, network, system, destination_atom_types,
+      intermediate_atom_types, max_depth, James::Path::WriteIdentifier::AtomID);
+  REQUIRE_THAT(ion_pairs_no_hydrogens_ids,
+               Catch::Matchers::RangeEquals(ion_pairs_no_h_required_ids));
 }
