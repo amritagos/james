@@ -19,7 +19,7 @@ struct Atom {
   int type{}; // Type number of the atom (could be an atomic number, or type
               // number as in LAMMPS)
   std::optional<int> mol_id = std::nullopt; // Molecule identifier
-  std::vector<double> position{};     // Position vector 
+  std::vector<double> position{};           // Position vector
 };
 
 class System {
