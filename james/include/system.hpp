@@ -85,6 +85,25 @@ public:
     return ids;
   }
 
+  // Get the index corresponding to the atom ID
+  std::optional<size_t> index_from_id(int target_id) const {
+
+    auto is_target_id = [&target_id](Atom atom) {
+      if (atom.id == target_id) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    // Search for the target ID
+    if (auto it = std::find_if(atoms.begin(), atoms.end(), is_target_id);
+        it != atoms.end())
+      return std::distance(atoms.begin(), it);
+    else
+      return std::nullopt;
+  }
+
   // Find all the indices (not IDs actually) in atoms with the desired molecule
   // ID
   std::vector<size_t> find_atoms_in_molecule(int target_mol_id) const {

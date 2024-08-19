@@ -18,6 +18,10 @@ TEST_CASE("Test the system", "[System]") {
   system.push_back(James::Atoms::Atom(1, 1, 1, positions[0]));
   system.push_back(James::Atoms::Atom(4, 4, 2, positions[1]));
 
+  // Test that you can get the index of an Atom given the ID
+  REQUIRE(system.index_from_id(1).value() == 0);
+  REQUIRE(system.index_from_id(3)==std::nullopt);
+
   // Test that the distance between the O and Cl is 3.02442
   double dist_required = 3.02442;
 
