@@ -20,7 +20,7 @@ TEST_CASE("Test the system", "[System]") {
 
   // Test that you can get the index of an Atom given the ID
   REQUIRE(system.index_from_id(1).value() == 0);
-  REQUIRE(system.index_from_id(3)==std::nullopt);
+  REQUIRE(system.index_from_id(3) == std::nullopt);
 
   // Test that the distance between the O and Cl is 3.02442
   double dist_required = 3.02442;
