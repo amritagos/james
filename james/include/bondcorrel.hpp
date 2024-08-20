@@ -4,6 +4,7 @@
 #include "undirected_network.hpp"
 #include <cmath>
 #include <cstddef>
+#include <iostream>
 #include <optional>
 #include <stdexcept>
 #include <vector>
@@ -217,8 +218,9 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
 
   if (calc_upto_tau.has_value()) {
     if (calc_upto_tau.value() > max_tau) {
-      fmt::print("Warning: You set calc_upto_tau to a value greater than "
-                 "max_tau. Setting to max_tau.\n");
+      std::cerr << "Warning: You set calc_upto_tau to a value greater than "
+                   "max_tau. Setting to max_tau."
+                << std::endl;
       calc_upto_tau = max_tau;
     }
   } else {
