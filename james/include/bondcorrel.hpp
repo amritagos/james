@@ -84,7 +84,7 @@ template <typename WeightType = double>
 std::vector<std::vector<int>> bond_connection_info_time_series(
     const std::vector<Graph::UndirectedNetwork<WeightType>>
         &network_time_series,
-    bool continuous_bond = false) {
+    bool continuous_bond = true) {
   std::vector<std::vector<int>>
       c_ij_time_series{}; // vector of flattened vectors of c(i,j) pairs. 0 if
                           // there is no connection and 1 if there is a
