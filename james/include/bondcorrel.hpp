@@ -7,130 +7,134 @@
 #include <iostream>
 #include <optional>
 #include <stdexcept>
+#include <unordered_set>
 #include <vector>
 
 namespace James::Bond::Correlation {
-/*Creates a flattened vector containing a binary value for each pair of atoms
+
+/*Combine hash function from Boost*/
+inline void hash_combine(std::size_t &seed, const std::size_t &v) {
+  seed ^= std::hash<std::size_t>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+/* Hash function for a std::pair*/
+struct pair_hash {
+  inline std::size_t operator()(const std::pair<size_t, size_t> &v) const {
+    std::size_t seed = 0;
+    hash_combine(seed, v.first);
+    hash_combine(seed, v.second);
+    return seed;
+  }
+};
+
+/*Define a type alias for a set of connected pairs using the custom hash*/
+using PairSet = std::unordered_set<std::pair<size_t, size_t>, pair_hash>;
+
+/*Creates a set containing pairs of connected atoms
  * (i,j), corresponding to whether there is a connection [c(i,j)=1] or not
  * [c(i,j)=0]. The values are arranged in the order (0,1), (0,2)...(1,2),
- * (1,3)... such that i<j (equal values ommitted since the bond cannot be
+ * (1,3)... such that i<j (equal values ommitted since the connection cannot be
  * between the atom itself).Takes the UndirectedNetwork as an
  * input. */
-template <typename WeightType = double>
-std::vector<int> bond_connection_info_at_tau(
-    const Graph::UndirectedNetwork<WeightType> &network) {
-  std::vector<int> c_ij{}; // flattened vector of c(i,j) pairs. 0 if there is no
-                           // connection and 1 if there is a connection
+template <typename NetworkType>
+PairSet bond_connection_info_at_tau(const NetworkType &network) {
+  PairSet pair_set{}; // set of (i,j) pairs where i<j. If there is a connection,
+                      // the pair is in the set
   const size_t n_atoms = network.n_agents();
-  int c_val{};
 
   // Loop through i j pairs
   for (size_t i = 0; i < n_atoms - 1; i++) {
     for (size_t j = i + 1; j < n_atoms; j++) {
       // For a particular pair (i,j)
       if (network.connection_exists(i, j)) {
-        c_val = 1;
-      } else {
-        c_val = 0;
+        pair_set.emplace(i, j);
       }
-      c_ij.push_back(c_val);
     }
   }
 
-  return c_ij;
+  return pair_set;
 }
 
-/*Creates a flattened vector containing a binary value for each pair of atoms
- * (i,j), corresponding to whether there is a connection [c(i,j)=1] or not
- * [c(i,j)=0]. A hydrogen bond is, however, considered to be broken if it has
- * been broken before (even if in the current step it reforms). Therefore, the
+/*Creates a set containing pairs of connected atoms (i,j) at the current
+ * timestep. A hydrogen bond is, however, considered to be broken if it has been
+ * broken before (even if in the current step it reforms). Therefore, the
  * previous bond information is required. The values are arranged in the order
  * (0,1), (0,2)...(1,2), (1,3)... such that i<j (equal values ommitted since the
  * bond cannot be between the atom itself).Takes the UndirectedNetwork as an
  * input. */
-template <typename WeightType = double>
-std::vector<int> continuous_bond_connection_info_at_tau(
-    const Graph::UndirectedNetwork<WeightType> &network,
-    const std::vector<int> &prev_c_val) {
-  std::vector<int> c_ij{}; // flattened vector of c(i,j) pairs. 0 if there is no
-                           // connection and 1 if there is a connection
+template <typename NetworkType>
+PairSet continuous_bond_connection_info_at_tau(const NetworkType &network,
+                                               const PairSet &prev_pair_set) {
+  PairSet pair_set{}; // set of (i,j) pairs where i<j. If there is a connection,
+                      // the pair is in the set
   const size_t n_atoms = network.n_agents();
-  int c_val{static_cast<int>(prev_c_val.size())};
 
   // Loop through i j pairs
-  size_t m = 0;
   for (size_t i = 0; i < n_atoms - 1; i++) {
     for (size_t j = i + 1; j < n_atoms; j++) {
-      // For a particular pair (i,j)
-      if (network.connection_exists(i, j)) {
-        if (prev_c_val[m] == 0) {
-          c_val = 0;
-        } else {
-          c_val = 1;
-        }
-      } else {
-        c_val = 0;
+      // Check if the bond existed in the previous step and still exists now
+      if (network.connection_exists(i, j) && prev_pair_set.contains({i, j})) {
+        pair_set.emplace(i, j);
       }
-      c_ij.push_back(c_val);
-      m++; // The position/index in the c_ij vector
     }
   }
 
-  return c_ij;
+  return pair_set;
 }
 
-/* Takes multiple `UndirectedNetwork` objects.*/
-template <typename WeightType = double>
-std::vector<std::vector<int>> bond_connection_info_time_series(
-    const std::vector<Graph::UndirectedNetwork<WeightType>>
-        &network_time_series,
+/* Takes multiple `UndirectedNetwork` objects, returning a vector of PairSet
+ * unordered sets*/
+template <typename NetworkType>
+std::vector<PairSet> bond_connection_info_time_series(
+    const std::vector<NetworkType> &network_time_series,
     bool continuous_bond = true) {
-  std::vector<std::vector<int>>
-      c_ij_time_series{}; // vector of flattened vectors of c(i,j) pairs. 0 if
-                          // there is no connection and 1 if there is a
-                          // connection
-  if (continuous_bond & (network_time_series.size() > 0)) {
+  std::vector<PairSet>
+      pair_set_time_series{}; // vector of sets of (i,j) pairs. If the set does
+                              // not contain a pair, it does not exist (0)
+
+  if (continuous_bond && !network_time_series.empty()) {
     // First timestep
-    auto c_ij = bond_connection_info_at_tau(network_time_series[0]);
-    c_ij_time_series.push_back(c_ij);
+    auto pair_set = bond_connection_info_at_tau(network_time_series[0]);
+    pair_set_time_series.push_back(pair_set);
     // Next timesteps (skip the first one)
     for (size_t i_step = 1; i_step < network_time_series.size(); i_step++) {
-      c_ij = continuous_bond_connection_info_at_tau(network_time_series[i_step],
-                                                    c_ij);
-      c_ij_time_series.push_back(c_ij);
+      pair_set = continuous_bond_connection_info_at_tau(
+          network_time_series[i_step], pair_set);
+      pair_set_time_series.push_back(pair_set);
     }
   } else {
-    for (auto &network : network_time_series) {
-      c_ij_time_series.push_back(bond_connection_info_at_tau(network));
+    for (const auto &network : network_time_series) {
+      pair_set_time_series.push_back(bond_connection_info_at_tau(network));
     }
   }
 
-  return c_ij_time_series;
+  return pair_set_time_series;
 }
 
 /* Calculate the correlation, at a single time origin (t0), given a lag time t
  */
-template <typename T>
-std::optional<double>
-correlation_t0_t(const std::vector<std::vector<T>> &c_ij_time_series, size_t t0,
+inline std::optional<double>
+correlation_t0_t(const std::vector<PairSet> &pair_set_time_series, size_t t0,
                  size_t t) {
   double unnorm_c_ij_val = 0.0;
   double norm_factor = 0.0;
   // Error handling
-  if (t0 >= c_ij_time_series.size() || t >= c_ij_time_series.size()) {
+  if (t0 >= pair_set_time_series.size() || t >= pair_set_time_series.size()) {
     std::runtime_error("The time origin or lag time was greater than the "
                        "number of timesteps.\n");
   }
-  if (c_ij_time_series.size() == 0) {
+  if (pair_set_time_series.size() == 0) {
     std::runtime_error("Empty vector for bond information\n");
   }
   // Calculate the correlation function (average over the atoms, so over inner
-  // vector size)
-  for (size_t i_atom = 0; i_atom < c_ij_time_series[0].size(); i_atom++) {
-    unnorm_c_ij_val +=
-        c_ij_time_series[t0][i_atom] * c_ij_time_series[t][i_atom];
-    norm_factor += c_ij_time_series[t0][i_atom] * c_ij_time_series[t0][i_atom];
+  // sets)
+  for (const auto &pair : pair_set_time_series[t0]) {
+    if (pair_set_time_series[t].contains(pair)) {
+      unnorm_c_ij_val += 1.0;
+    }
+    norm_factor += 1.0;
   }
+
   if (norm_factor != 0) {
     return unnorm_c_ij_val / norm_factor;
   } else {
@@ -141,19 +145,26 @@ correlation_t0_t(const std::vector<std::vector<T>> &c_ij_time_series, size_t t0,
 /*Time correlation function, returning the tau values, the normalized
 correlation function values, and the standard error in the correlation
 function values.
+ - Takes in a series of UndirectedNetwork or DirectedNetwork objects
  - start_t0: the index of the first time origin. Default value = 0
  - start_tau: first time lag (inclusive). Default value = 1.
  - delta_tau: Step size in the time lag. Default value = 1.
  - calc_upto_tau: represents the index. By default (also if set
 to nullopt), this is half of the total number of steps in the c_ij_time_series
 */
-template <typename T>
+template <typename NetworkType>
 std::tuple<std::vector<double>, std::vector<std::optional<double>>,
            std::vector<std::optional<double>>>
-time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
+time_correlation_function(const std::vector<NetworkType> &network_time_series,
                           const std::vector<double> &time, int start_t0 = 0,
                           int start_tau = 1, int delta_tau = 1,
-                          std::optional<int> calc_upto_tau = std::nullopt) {
+                          std::optional<int> calc_upto_tau = std::nullopt,
+                          bool continuous_bond = true) {
+  // ----------------------------------------------
+  // Get the bond connectivity information from the networks
+  auto pair_set_time_series =
+      bond_connection_info_time_series(network_time_series, continuous_bond);
+  // ----------------------------------------------
   // Lambda to calculate the mean of a vector of TCF values (over time origins)
   // Skips std::nullopt values; returns this if the entire vector is
   // std::nullopt
@@ -204,12 +215,13 @@ time_correlation_function(const std::vector<std::vector<T>> &c_ij_time_series,
         for (size_t i = 0; i < tcf_values_at_lag_time.size(); i++) {
           size_t t0 = i + start_t0;
           size_t t = t0 + current_tau;
-          tcf_values_at_lag_time[i] = correlation_t0_t(c_ij_time_series, t0, t);
+          tcf_values_at_lag_time[i] =
+              correlation_t0_t(pair_set_time_series, t0, t);
         }
       };
   // -----------------------------
   // Handling the value of calc_upto_tau
-  const int n_frames = c_ij_time_series.size();
+  const int n_frames = pair_set_time_series.size();
   int max_tau = static_cast<int>(0.5 * n_frames);
   // For odd n_frames, max_tau must be inclusive, so increment by 1
   if (n_frames % 2 != 0) {
