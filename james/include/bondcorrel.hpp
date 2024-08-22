@@ -36,9 +36,8 @@ using PairSet = std::unordered_set<std::pair<size_t, size_t>, pair_hash>;
  * (1,3)... such that i<j (equal values ommitted since the connection cannot be
  * between the atom itself).Takes the UndirectedNetwork as an
  * input. */
-template <typename WeightType = double>
-PairSet bond_connection_info_at_tau(
-    const Graph::UndirectedNetwork<WeightType> &network) {
+template <typename NetworkType>
+PairSet bond_connection_info_at_tau(const NetworkType &network) {
   PairSet pair_set{}; // set of (i,j) pairs where i<j. If there is a connection,
                       // the pair is in the set
   const size_t n_atoms = network.n_agents();
@@ -63,10 +62,9 @@ PairSet bond_connection_info_at_tau(
  * (0,1), (0,2)...(1,2), (1,3)... such that i<j (equal values ommitted since the
  * bond cannot be between the atom itself).Takes the UndirectedNetwork as an
  * input. */
-template <typename WeightType = double>
-PairSet continuous_bond_connection_info_at_tau(
-    const Graph::UndirectedNetwork<WeightType> &network,
-    const PairSet &prev_pair_set) {
+template <typename NetworkType>
+PairSet continuous_bond_connection_info_at_tau(const NetworkType &network,
+                                               const PairSet &prev_pair_set) {
   PairSet pair_set{}; // set of (i,j) pairs where i<j. If there is a connection,
                       // the pair is in the set
   const size_t n_atoms = network.n_agents();
@@ -86,10 +84,9 @@ PairSet continuous_bond_connection_info_at_tau(
 
 /* Takes multiple `UndirectedNetwork` objects, returning a vector of PairSet
  * unordered sets*/
-template <typename WeightType = double>
+template <typename NetworkType>
 std::vector<PairSet> bond_connection_info_time_series(
-    const std::vector<Graph::UndirectedNetwork<WeightType>>
-        &network_time_series,
+    const std::vector<NetworkType> &network_time_series,
     bool continuous_bond = true) {
   std::vector<PairSet>
       pair_set_time_series{}; // vector of sets of (i,j) pairs. If the set does
@@ -148,18 +145,26 @@ correlation_t0_t(const std::vector<PairSet> &pair_set_time_series, size_t t0,
 /*Time correlation function, returning the tau values, the normalized
 correlation function values, and the standard error in the correlation
 function values.
+ - Takes in a series of UndirectedNetwork or DirectedNetwork objects
  - start_t0: the index of the first time origin. Default value = 0
  - start_tau: first time lag (inclusive). Default value = 1.
  - delta_tau: Step size in the time lag. Default value = 1.
  - calc_upto_tau: represents the index. By default (also if set
 to nullopt), this is half of the total number of steps in the c_ij_time_series
 */
-inline std::tuple<std::vector<double>, std::vector<std::optional<double>>,
-                  std::vector<std::optional<double>>>
-time_correlation_function(const std::vector<PairSet> &pair_set_time_series,
+template <typename NetworkType>
+std::tuple<std::vector<double>, std::vector<std::optional<double>>,
+           std::vector<std::optional<double>>>
+time_correlation_function(const std::vector<NetworkType> &network_time_series,
                           const std::vector<double> &time, int start_t0 = 0,
                           int start_tau = 1, int delta_tau = 1,
-                          std::optional<int> calc_upto_tau = std::nullopt) {
+                          std::optional<int> calc_upto_tau = std::nullopt,
+                          bool continuous_bond = true) {
+  // ----------------------------------------------
+  // Get the bond connectivity information from the networks
+  auto pair_set_time_series =
+      bond_connection_info_time_series(network_time_series, continuous_bond);
+  // ----------------------------------------------
   // Lambda to calculate the mean of a vector of TCF values (over time origins)
   // Skips std::nullopt values; returns this if the entire vector is
   // std::nullopt
