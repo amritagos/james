@@ -5,21 +5,31 @@
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <filesystem>
 #include <optional>
+#include <utility>
 #include <vector>
 namespace fs = std::filesystem;
 
 TEST_CASE(
     "Test that you can write and read a file with the correlation function",
     "[IO]") {
-  // Create a correlation function
-  auto c_ij_time_series = std::vector<std::vector<int>>{
-      {1, 1, 1, 1, 1}, {1, 0, 1, 1, 1}, {1, 0, 0, 1, 1},
-      {1, 0, 0, 0, 1}, {1, 0, 0, 0, 0}, {0, 0, 0, 0, 0}};
+  using namespace James::Bond::Correlation;
+  // Create a vector of Pairset unordered sets for each time step (5)
+  PairSet set0{std::make_pair(0, 1), std::make_pair(0, 2), std::make_pair(0, 3),
+               std::make_pair(1, 2), std::make_pair(1, 3)}; // At timestep 0
+  PairSet set1{std::make_pair(0, 1), std::make_pair(0, 3), std::make_pair(1, 2),
+               std::make_pair(1, 3)}; // At timestep 10
+  PairSet set2{std::make_pair(0, 1), std::make_pair(1, 2),
+               std::make_pair(1, 3)};                       // At timestep 20
+  PairSet set3{std::make_pair(0, 1), std::make_pair(1, 3)}; // At timestep 30
+  PairSet set4{std::make_pair(0, 1)};                       // At timestep 40
+  PairSet set5{};                                           // At timestep 50
+  auto pair_set_time_series =
+      std::vector<PairSet>{set0, set1, set2, set3, set4, set5};
   // Time series
   std::vector<double> times{0, 10, 20, 30, 40, 50};
   auto [tau_values, tcf_values, tcf_stderr] =
       James::Bond::Correlation::time_correlation_function(
-          c_ij_time_series, times, 0, 1, 1, std::nullopt);
+          pair_set_time_series, times, 0, 1, 1, std::nullopt);
 
   // Save the correlation function to a file
   auto proj_root_path = fs::current_path();
