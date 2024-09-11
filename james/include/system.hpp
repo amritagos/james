@@ -85,6 +85,29 @@ public:
     return ids;
   }
 
+  // Collect all the positions in the System object
+  std::vector<std::vector<double>> collect_positions() {
+    auto positions = std::vector<std::vector<double>>{};
+
+    std::transform(
+        atoms.begin(), atoms.end(), std::back_inserter(positions),
+        [](Atom const &a) -> std::vector<double> { return a.position; });
+
+    return positions;
+  }
+
+  // Set all the positions in the System object
+  void reset_positions(std::vector<std::vector<double>> &positions) {
+    if (positions.size() != atoms.size()) {
+      std::runtime_error("The number of positions is unequal to the number of "
+                         "atoms in the System object");
+    }
+
+    for (int i = 0; i < n_atoms(); i++) {
+      atoms[i].position = positions[i];
+    }
+  }
+
   // Get the index corresponding to the atom ID
   std::optional<size_t> index_from_id(int target_id) const {
 
