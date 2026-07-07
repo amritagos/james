@@ -104,7 +104,8 @@ template <typename WeightType = double>
 void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
                               const James::Atoms::System &system,
                               std::vector<Pair> &pairs,
-                              std::vector<double> &cutoffs) {
+                              std::vector<double> &cutoffs,
+                              bool skip_same_mol_id = false) {
   // The number of Pair objects should correspond to an equal number of cutoff
   // values
   if (pairs.size() != cutoffs.size()) {
@@ -119,6 +120,14 @@ void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
     for (size_t j_idx = i_idx + 1; j_idx < system.atoms.size(); j_idx++) {
       int i_type = system.atoms[i_idx].type;
       int j_type = system.atoms[j_idx].type;
+
+      // Optionally skip creating intramolecular bonds if the flag is provided
+      if (skip_same_mol_id && system.atoms[i_idx].mol_id.has_value() &&
+          system.atoms[j_idx].mol_id.has_value() &&
+          system.atoms[i_idx].mol_id == system.atoms[j_idx].mol_id) {
+        continue;
+      }
+
       // If the key with the Pair i_type, j_type does not exist, then skip
       if (!pair_cutoff_map.contains(Pair(i_type, j_type))) {
         continue;
