@@ -108,7 +108,7 @@ void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
   // The number of Pair objects should correspond to an equal number of cutoff
   // values
   if (pairs.size() != cutoffs.size()) {
-    std::runtime_error("Inconsistent Pair and cutoff values\n");
+    throw std::runtime_error("Inconsistent Pair and cutoff values\n");
   }
   auto pair_cutoff_map = create_pairtype_cutoffs(
       pairs, cutoffs); // create an unordered_map with Pair objects as keys and
@@ -124,7 +124,7 @@ void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
         continue;
       }
       // If the Pair exists, then the cutoff can be accessed
-      double cutoff = pair_cutoff_map[Pair(i_type, j_type)];
+      double cutoff = pair_cutoff_map.at(Pair(i_type, j_type));
       // Get the distance
       double r_ij = system.distance(i_idx, j_idx);
 
