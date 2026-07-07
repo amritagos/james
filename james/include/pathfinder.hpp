@@ -115,4 +115,63 @@ find_ion_pairs(size_t source, Graph::NetworkBase<WeightType> &network,
   return ion_pairs;
 }
 
+/*
+Find shortest paths between a source atom and destination atom types, but only
+keep paths whose endpoints belong to different molecules/chains.
+
+This is useful for ion-mediated inter-chain residue-residue paths, e.g.
+positive residue -- Cl -- Na -- negative residue.
+
+The returned path order is the same as find_ion_pairs: destination ... source.
+*/
+template <typename WeightType = double>
+std::vector<std::vector<int>> find_interchain_ion_pairs(
+    size_t source, Graph::NetworkBase<WeightType> &network,
+    const James::Atoms::System &system,
+    const std::vector<int> &destination_atom_types,
+    const std::vector<int> &intermediate_atom_types,
+    std::optional<int> max_depth, bool require_intermediate = true,
+    WriteIdentifier identifier = WriteIdentifier::AtomID) {
+  auto index_paths = find_ion_pairs(
+      source, network, system, destination_atom_types, intermediate_atom_types,
+      max_depth, WriteIdentifier::Index);
+
+  std::vector<std::vector<int>> interchain_paths{};
+
+  for (auto &path : index_paths) {
+    if (path.size() < 2) {
+      continue;
+    }
+
+    if (require_intermediate && path.size() < 3) {
+      continue;
+    }
+
+    // Existing path order is destination ... source.
+    const auto dest_idx = static_cast<size_t>(path.front());
+    const auto source_idx = static_cast<size_t>(path.back());
+
+    const auto source_mol_id = system.atoms[source_idx].mol_id;
+    const auto dest_mol_id = system.atoms[dest_idx].mol_id;
+
+    // For inter-chain paths, both endpoints need molecule IDs.
+    if (!source_mol_id.has_value() || !dest_mol_id.has_value()) {
+      continue;
+    }
+
+    // Skip intra-chain paths.
+    if (source_mol_id.value() == dest_mol_id.value()) {
+      continue;
+    }
+
+    if (identifier == WriteIdentifier::AtomID) {
+      convert_path_to_ids(path, system);
+    }
+
+    interchain_paths.push_back(path);
+  }
+
+  return interchain_paths;
+}
+
 } // namespace James::Path

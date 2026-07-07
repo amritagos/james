@@ -18,6 +18,8 @@ tests = [
   ['Ion_Pairs', 'test/test_ion_pairs.cpp'],
   ['Test_Correl', 'test/test_correlation.cpp'],
   ['Test_IO', 'test/test_io.cpp'],
+  ['Protein_Ion_Paths', 'test/test_protein_ion_paths.cpp'],
+
 ]
 
 test_inc = []
