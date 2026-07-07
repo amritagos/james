@@ -120,7 +120,7 @@ void add_distance_based_bonds(Graph::NetworkBase<WeightType> &network,
       int i_type = system.atoms[i_idx].type;
       int j_type = system.atoms[j_idx].type;
       // If the key with the Pair i_type, j_type does not exist, then skip
-      if (pair_cutoff_map.contains(Pair(i_type, j_type == false))) {
+      if (!pair_cutoff_map.contains(Pair(i_type, j_type))) {
         continue;
       }
       // If the Pair exists, then the cutoff can be accessed
