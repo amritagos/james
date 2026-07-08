@@ -1,0 +1,35 @@
+[project]
+name = "pyjames"
+version = "0.1.0"
+description = "Python bindings for James"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+examples = [
+    "ase",
+    "polars",
+    "pyarrow",
+]
+
+[build-system]
+requires = [
+    "meson-python",
+    "pybind11",
+]
+build-backend = "mesonpy"
+
+[tool.meson-python.args]
+setup = [
+    "-Dwrap_mode=forcefallback",
+]
+install = [
+    "--skip-subprojects",
+]
+dist = [
+    "--include-subprojects",
+]

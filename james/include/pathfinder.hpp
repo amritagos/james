@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <cstdio>
 #include <vector>
+#include <algorithm>
+#include <climits>
 
 namespace James::Path {
 

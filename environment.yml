@@ -19,3 +19,11 @@ dependencies:
   - clang-format=18.1.1
   - tomlplusplus
   - catch2
+  - python
+  - pip
+  - pybind11
+  - meson-python
+  - pytest
+  - ase
+  - polars
+  - pyarrow

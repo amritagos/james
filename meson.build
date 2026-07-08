@@ -36,3 +36,31 @@ foreach t : tests
   )
   test(t.get(0), exe, workdir : meson.project_source_root())
 endforeach
+
+# Python bindings
+py = import('python').find_installation('python', pure : false)
+python_dep = py.dependency()
+pybind11_dep = dependency('pybind11')
+
+py.extension_module(
+  'jamescpp',
+  sources : [
+    'python_bindings/bindings.cpp',
+  ],
+  include_directories : inc,
+  dependencies : [
+    james_dep,
+    python_dep,
+    pybind11_dep,
+  ],
+  install : true,
+  subdir : 'pyjames',
+)
+
+py.install_sources(
+  [
+    'pyjames/__init__.py',
+  ],
+  pure : false,
+  subdir : 'pyjames',
+)
