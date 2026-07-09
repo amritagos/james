@@ -6,9 +6,26 @@ from typing import Literal, Sequence
 import numpy as np
 from ase import Atoms
 from ase.io import write
+from ase.data import chemical_symbols
 
 
 PathIdentifier = Literal["index", "atom_id"]
+
+
+def _specorder_from_atom_type_count(atom_type_count: int) -> list[str]:
+    if atom_type_count < 1:
+        raise ValueError("atom_type_count must be at least 1.")
+
+    n_available_symbols = len(chemical_symbols) - 1
+
+    if atom_type_count > n_available_symbols:
+        raise ValueError(
+            f"Cannot create ASE specorder for {atom_type_count} atom types. "
+            f"ASE only has {n_available_symbols} chemical symbols available."
+        )
+
+    # chemical_symbols[0] is "X", so start at 1.
+    return [chemical_symbols[i] for i in range(1, atom_type_count + 1)]
 
 
 def _normalise_bonds_array(existing_bonds, n_atoms: int) -> np.ndarray:
@@ -115,9 +132,10 @@ def write_lammps_data_with_path_bonds(
     path_identifier: PathIdentifier = "index",
     existing_bonds: Sequence[str] | None = None,
     path_bond_type: int | None = None,
+    atom_type_count: int | None = None,
     atom_style: str = "full",
     units: str = "real",
-    masses: bool = True,
+    masses: bool = False,
 ) -> int:
     """
     Write a LAMMPS data file with the path edges added as bonds.
@@ -179,6 +197,14 @@ def write_lammps_data_with_path_bonds(
 
     atoms_out.arrays["bonds"] = bonds
 
+    if atom_type_count is None and "type" in atoms_out.arrays:
+        atom_type_count = int(np.max(np.asarray(atoms_out.arrays["type"], dtype=int)))
+
+    if atom_type_count is None:
+        specorder = None
+    else:
+        specorder = _specorder_from_atom_type_count(atom_type_count)
+
     write(
         output_file,
         atoms_out,
@@ -187,6 +213,7 @@ def write_lammps_data_with_path_bonds(
         units=units,
         bonds=True,
         masses=masses,
+        specorder=specorder,
     )
 
     return path_bond_type

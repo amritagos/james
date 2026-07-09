@@ -33,3 +33,8 @@ install = [
 dist = [
     "--include-subprojects",
 ]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Setting the shape on a NumPy array has been deprecated.*:DeprecationWarning:ase\\.atoms",
+]
