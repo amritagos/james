@@ -60,6 +60,7 @@ py.extension_module(
 py.install_sources(
   [
     'pyjames/__init__.py',
+    'pyjames/create_system.py',
   ],
   pure : false,
   subdir : 'pyjames',
